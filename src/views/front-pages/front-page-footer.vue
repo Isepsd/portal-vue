@@ -200,13 +200,8 @@ const demoList = [
             &copy;
 
             {{ new Date().getFullYear() }}
-            <a
-              href="https://pixinvent.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="font-weight-bold ms-1 text-white"
-            >Pixinvent</a>,
-            Made With ❤️ for a better web.
+          Quadran,
+            Made With  for a better web.
           </div>
 
           <div class="d-flex gap-x-6">

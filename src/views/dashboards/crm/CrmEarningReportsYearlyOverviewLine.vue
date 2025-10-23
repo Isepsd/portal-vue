@@ -125,16 +125,38 @@ const chartConfigs = computed(() => {
             <div style="width: 100%; max-height: 300px; overflow-y: auto; border: 1px solid #ddd;">
               <table style="width: 100%; min-width: 100%; border-collapse: collapse;">
                 <thead>
-                  <tr>
-                    <th style="border: 1px solid #ddd; padding: 8px; position: sticky; top: 0; background-color: #f1f1f1;">Category</th>
-                    <!-- Render Series Headers -->
-                    <template v-for="(s, index) in props.series" :key="index">
-                      <th style="border: 1px solid #ddd; padding: 8px; position: sticky; top: 0; background-color: #f1f1f1;">
-                        {{ s.name }}
-                      </th>
-                    </template>
-                  </tr>
-                </thead>
+                      <tr>
+                        <th
+                          style="
+                            border: 1px solid #ddd;
+                            padding: 8px;
+                            position: sticky;
+                            top: 0;
+                            background-color: #20B2AA;
+                            color: white;
+                          "
+                        >
+                          Category
+                        </th>
+
+                        <!-- Render Series Headers -->
+                        <template v-for="(s, index) in props.series" :key="index">
+                          <th
+                            style="
+                              border: 1px solid #ddd;
+                              padding: 8px;
+                              position: sticky;
+                              top: 0;
+                              background-color: #20B2AA;
+                              color: white;
+                            "
+                          >
+                            {{ s.name }}
+                          </th>
+                        </template>
+                      </tr>
+                    </thead>
+
                 <tbody>
                   <!-- Render Table Rows for Categories -->
                   <template v-for="(category, catIndex) in props.categories" :key="catIndex">

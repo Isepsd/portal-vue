@@ -1,7 +1,51 @@
-import type { UserThemeConfig } from './types'
+// src/path/to/defineThemeConfig.ts
 import type { LayoutConfig } from '@layouts/types'
+import { colorSchemeDarkBlue, colorSchemeLightCold, themeQuartz } from 'ag-grid-community'
+import type { UserThemeConfig } from './types'
 
-export const defineThemeConfig = (userConfig: UserThemeConfig): { themeConfig: UserThemeConfig; layoutConfig: LayoutConfig } => {
+/**
+ * Buat AG Grid theme instance
+ */
+export const createAgGridTheme = (themeMode: 'light' | 'dark' | 'system'): any => {
+  if (themeMode === 'light') return themeQuartz.withPart(colorSchemeLightCold)
+  if (themeMode === 'dark') return themeQuartz.withPart(colorSchemeDarkBlue)
+
+  // system: deteksi preferensi OS
+  const prefersDark =
+    typeof window !== 'undefined' &&
+    window.matchMedia?.('(prefers-color-scheme: dark)').matches
+  return prefersDark ? themeQuartz.withPart(colorSchemeDarkBlue) : themeQuartz.withPart(colorSchemeLightCold)
+}
+
+/**
+ * Set theme AG Grid global
+ */
+export const setGlobalAgGridTheme = (themeInstance: any) => {
+  if (typeof window !== 'undefined') {
+    ;(window as any).__AG_GRID_THEME__ = themeInstance
+  }
+}
+
+/**
+ * Ambil theme AG Grid global
+ */
+export const getGlobalAgGridTheme = (): any => {
+  return typeof window !== 'undefined' ? (window as any).__AG_GRID_THEME__ : undefined
+}
+
+/**
+ * defineThemeConfig (dengan integrasi AG Grid theme global)
+ */
+export const defineThemeConfig = (
+  userConfig: UserThemeConfig
+): { themeConfig: UserThemeConfig; layoutConfig: LayoutConfig } => {
+  // Buat AG Grid theme sesuai konfigurasi awal
+  const agGridTheme = createAgGridTheme(userConfig.app.theme as 'light' | 'dark' | 'system')
+
+  // Simpan secara global
+  setGlobalAgGridTheme(agGridTheme)
+
+  // Return tanpa menyentuh struktur app
   return {
     themeConfig: userConfig,
     layoutConfig: {

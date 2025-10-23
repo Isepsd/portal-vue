@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { toTitleCase } from '@/components/helper/string.helper';
 import CrmEarningReportsYearlyOverviewLine from '@/views/dashboards/crm/CrmEarningReportsYearlyOverviewLine.vue';
-import CrmOrderBarChart from '@/views/dashboards/crm/CrmOrderBarChart.vue';
+import CrmOrderBarChartKinerjaScada from '@/views/dashboards/crm/CrmOrderBarChartKinerjaScada.vue';
 import axios from 'axios';
 import { get } from 'lodash';
 import { nanoid } from 'nanoid';
@@ -10,6 +10,11 @@ import { ref, watch } from 'vue';
 // Definisikan reaktif state untuk data, loading, dll.
 const categories = ref<any[]>([]);  // Reactive state for categories
 const series = ref<any[]>([]);      // Reactive state for series
+const categoriesKin = ref<any[]>([]);  // Reactive state for categories
+console.log("categories",categoriesKin)
+const seriesKin = ref<any[]>([]);      // Reactive state for series
+
+console.log("series",seriesKin)
 const simpleStatisticsDemoCards = ref<any[]>([]);  // Reactive state for cards data
 const loading = ref<boolean>(true);  // Reactive state for loading indicator
 const filterValues = ref<any>({
@@ -34,15 +39,15 @@ const getPathBasedOnKinerjaScada = (basePath: string) => {
 };
 
 // Fungsi untuk mengambil data dari API
+
 const getAllData = async () => {
-  loading.value = true; // Set loading true saat data sedang diambil
+  loading.value = true;
+
   try {
     const pathService = get(API_PATH(), getPathBasedOnKinerjaScada('dashboard_up2d_banten.kinerja_scada'));
 
-    // Membatalkan request sebelumnya jika ada
+    // Batalkan request sebelumnya jika masih berjalan
     source.cancel('Request canceled due to new filter change.');
-
-    // Membuat token baru untuk request
     source = axios.CancelToken.source();
 
     const req: any = await getAllByPath(
@@ -53,23 +58,23 @@ const getAllData = async () => {
 
     const { results } = req;
 
-    // Jika datachart ada
+    /** === BAGIAN datachart === */
     if (results?.datachart) {
       const categoriesData = get(results.datachart[0], 'categories', []);
       const seriesData = get(results.datachart[1], 'series', []);
 
-      categories.value = categoriesData;  // Update categories
+      categories.value = categoriesData;
       const formattedSeries = seriesData.map((item: any) => ({
-        name: toTitleCase(item?.name || "").concat(""),
+        name: toTitleCase(item?.name || '').concat(''),
         data: item?.data || [],
       }));
-      series.value = formattedSeries;  // Update series
+      series.value = formattedSeries;
     } else {
       categories.value = [];
       series.value = [];
     }
 
-    // Jika ada data rekap
+    /** === BAGIAN rekap === */
     if (results?.rekap) {
       const rekap = results.rekap;
       simpleStatisticsDemoCards.value = rekap.map((item: any) => ({
@@ -78,10 +83,28 @@ const getAllData = async () => {
         subname: item.label || '',
       }));
     }
+
+    /** === BAGIAN kinerjapoint (versi React kamu) === */
+    if (results?.kinerjapoint) {
+      const categoriesData = get(results.kinerjapoint[0], 'categories', []);
+      const seriesData = get(results.kinerjapoint[1], 'series', []);
+
+      categoriesKin.value = categoriesData;
+      const formattedSeries = seriesData.map((item: any) => ({
+        name: toTitleCase(item?.name || '').concat(''), // kalau perlu suffix, tambahkan di sini
+        data: item?.data || [],
+        yAxis: item?.yAxis,
+      }));
+      seriesKin.value = formattedSeries;
+    } else {
+      categoriesKin.value = [];
+      seriesKin.value = [];
+    }
+
   } catch (err) {
     console.error('Error fetching data:', err);
   } finally {
-    loading.value = false; // Set loading false setelah data diambil
+    loading.value = false;
   }
 };
 
@@ -171,13 +194,24 @@ watch(filterValues, (newVal, oldVal) => {
   <!-- ROW: Earning Overview - Posisi Kiri -->
   <VRow>
     <VCol cols="12" md="8">
+     
       <CrmEarningReportsYearlyOverviewLine 
         :categories="categories"
         :series="series"
       />
+
     </VCol>
     <VCol cols="12" md="4">
-      <CrmOrderBarChart />
+      <AppCardCode
+        title="Jumlah Jenis Point"
+        :code="{ ts: '', js: '' }"
+      >
+      <CrmOrderBarChartKinerjaScada 
+      :categories="categoriesKin"
+        :series="seriesKin"
+      
+      />
+        </AppCardCode>
     </VCol>
   </VRow>
 </template>
