@@ -3,7 +3,7 @@ export const Skins = {
   Bordered: 'bordered',
 } as const
 
-export const Theme = {
+export const Theme:any = {
   Light: 'light',
   Dark: 'dark',
   System: 'system',

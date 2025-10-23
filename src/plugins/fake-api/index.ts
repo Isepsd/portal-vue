@@ -39,13 +39,26 @@ const worker = setupWorker(
   ...handlerDashboard,
 )
 
+// Jalankan worker hanya jika mode Vite adalah "mock"
 export default function () {
-  const workerUrl = `${import.meta.env.BASE_URL ?? '/'}mockServiceWorker.js`
+  if (import.meta.env.MODE === 'mock') {
+    const workerUrl = `${import.meta.env.BASE_URL ?? '/'}mockServiceWorker.js`
 
-  worker.start({
-    serviceWorker: {
-      url: workerUrl,
-    },
-    onUnhandledRequest: 'bypass',
-  })
+    worker
+      .start({
+        serviceWorker: {
+          url: workerUrl,
+        },
+        // Ubah dari 'bypass' jadi 'warn' agar tidak kirim ulang request
+        onUnhandledRequest: 'warn',
+      })
+      .then(() => {
+        console.info('[MSW] Mock Service Worker aktif (mode: mock)')
+      })
+      .catch((err) => {
+        console.error('[MSW] Gagal memulai Mock Service Worker:', err)
+      })
+  } else {
+    console.info('[MSW] Tidak aktif (mode:', import.meta.env.MODE, ')')
+  }
 }
