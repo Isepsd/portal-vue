@@ -1,47 +1,23 @@
-import type { RouteNamedMap, _RouterTyped } from 'unplugin-vue-router'
-import { canNavigate } from '@layouts/plugins/casl'
+export const setupGuards = (router: any) => {
+  router.beforeEach((to: any) => {
+    const requiresAuth = to.meta.requiresAuth;
+    const isLoggedIn = !!(useCookie('userData').value && useCookie('accessToken').value);
 
-export const setupGuards = (router: _RouterTyped<RouteNamedMap & { [key: string]: any }>) => {
-  // 👉 router.beforeEach
-  // Docs: https://router.vuejs.org/guide/advanced/navigation-guards.html#global-before-guards
-  router.beforeEach(to => {
-    /*
-     * If it's a public route, continue navigation. This kind of pages are allowed to visited by login & non-login users. Basically, without any restrictions.
-     * Examples of public routes are, 404, under maintenance, etc.
-     */
-    if (to.meta.public)
-      return
+    // 🔹 Allow access to login/register/forgot-password/index
+    const publicPages = ['login', 'register', 'forgot-password', 'index'];
+    const isPublicPage = publicPages.includes(to.name as string);
 
-    /**
-     * Check if user is logged in by checking if token & user data exists in local storage
-     * Feel free to update this logic to suit your needs
-     */
-    const isLoggedIn = !!(useCookie('userData').value && useCookie('accessToken').value)
-
-    /*
-      If user is logged in and is trying to access login like page, redirect to home
-      else allow visiting the page
-      (WARN: Don't allow executing further by return statement because next code will check for permissions)
-     */
-    if (to.meta.unauthenticatedOnly) {
-      if (isLoggedIn)
-        return '/'
-      else
-        return undefined
+    // ✅ Jika user sudah login tapi mau buka login/register → redirect ke dashboard
+    if (isLoggedIn && ['login', 'register', 'forgot-password'].includes(to.name as string)) {
+      return { name: 'index' }; // atau route dashboard utama kamu
     }
 
-    if (!canNavigate(to) && to.matched.length) {
-      /* eslint-disable indent */
-      return isLoggedIn
-        ? { name: 'not-authorized' }
-        : {
-            name: 'login',
-            query: {
-              ...to.query,
-              to: to.fullPath !== '/' ? to.path : undefined,
-            },
-          }
-      /* eslint-enable indent */
+    // 🔹 Redirect ke login jika butuh auth tapi belum login
+    if (requiresAuth && !isLoggedIn && !isPublicPage) {
+      return { name: 'login' };
     }
-  })
+
+    // Lanjutkan untuk route lain
+    return undefined;
+  });
 }

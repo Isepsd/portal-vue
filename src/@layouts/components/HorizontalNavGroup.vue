@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { layoutConfig } from '@layouts'
 import { HorizontalNavLink, HorizontalNavPopper } from '@layouts/components'
-import { canViewNavMenuGroup } from '@layouts/plugins/casl'
+// import { canViewNavMenuGroup } from '@layouts/plugins/casl'
 import { useLayoutConfigStore } from '@layouts/stores/config'
 import type { NavGroup } from '@layouts/types'
 import { getDynamicI18nProps, isNavGroupActive } from '@layouts/utils'
@@ -39,11 +39,15 @@ watch(() => route.path, () => {
 
   isGroupActive.value = isActive
 }, { immediate: true })
+const getChildComponent = (child: any) => {
+  return 'children' in child ? 'VerticalNavGroup' : 'VerticalNavLink'
+}
+
 </script>
 
 <template>
   <HorizontalNavPopper
-    v-if="canViewNavMenuGroup(item)"
+    v-if="getChildComponent(item)"
     :is-rtl="configStore.isAppRTL"
     class="nav-group"
     tag="li"

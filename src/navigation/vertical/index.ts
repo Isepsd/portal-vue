@@ -1,11 +1,39 @@
-import type { VerticalNavItems } from '@layouts/types'
-import appsAndPages from './apps-and-pages'
-import charts from './charts'
-import dashboard from './dashboard'
-import fasop from './fasop'
-import forms from './forms'
-import opsisdis from './opsisdis'
-import others from './others'
-import uiElements from './ui-elements'
+import { convertTreeToNav } from '@/@core/utils/convertTreeToNav'
+import { useNavigationStore } from '@/pages/stores/navigation'
+import { computed, onMounted, ref, toRaw } from 'vue'
+// 🔹 Static navigation fallback
 
-export default [...dashboard,...fasop,...opsisdis, ...appsAndPages, ...uiElements, ...forms, ...charts, ...others] as VerticalNavItems
+export function useVerticalNav() {
+  const navigationStore = useNavigationStore()
+
+  const isLoading = ref(true)
+  const isInitialized = ref(false)
+
+  onMounted(() => {
+    isLoading.value = false
+    isInitialized.value = true
+  })
+
+  const verticalNavItems = computed(() => {
+    console.log('=== DEBUG useVerticalNav ===')
+    console.log('Navigation Store:', navigationStore.verticalNav)
+
+    // 🔹 Convert navigation dari store, jika ada
+    const convertedNavigation = convertTreeToNav(toRaw(navigationStore.navigation)) || []
+
+    // 🔹 Spread array murni, bukan ComputedRef
+    const navItems = [...convertedNavigation]
+
+    console.log('✅ Final Vertical Nav Items:', navItems)
+    console.log('===========================')
+    return navItems
+  })
+
+  const isNavigationReady = computed(() => verticalNavItems.value.length > 0)
+
+  return {
+    verticalNavItems,
+    isLoading: computed(() => isLoading.value),
+    isNavigationReady,
+  }
+}

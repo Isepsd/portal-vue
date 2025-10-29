@@ -11,15 +11,9 @@ export const redirects: RouteRecordRaw[] = [
     name: 'index',
     redirect: to => {
       // TODO: Get type from backend
-      const userData = useCookie<Record<string, unknown> | null | undefined>('userData')
-      const userRole = userData.value?.role
 
-      if (userRole === 'admin')
-        return { name: 'dashboards-kinerjascada' }
-      if (userRole === 'client')
-        return { name: 'access-control' }
 
-      return { name: 'login', query: to.query }
+      return { name: 'dashboards-dashfasop-kinerjascada', query: to.query }
     },
   },
   {
@@ -73,4 +67,47 @@ export const routes: RouteRecordRaw[] = [
     name: 'apps-ecommerce-dashboard',
     component: () => import('@/pages/dashboards/ecommerce.vue'),
   },
+
+   // ✅ Tambahan route untuk menu administrator → roles menu
+//   {
+//   path: '/administrator/rolesettings',
+//   name: 'administrator-rolesettings',
+//   component: () => import('@/pages/administrator/rolesettings.vue'),
+//   meta: {
+//     requiresAuth: true,
+//     navActiveLink: 'administrator-rolesettings',
+//   },
+// },
+//  {
+//     path: '/dashboards/kinerjascada',
+//     name: 'dashboards-kinerjascada',
+//     component: () => import('@/pages/dashboards/kinerjascada.vue'),
+//     meta: {
+//       requiresAuth: true,
+//       navActiveLink: 'dashboard',
+//     },
+//   },
+
+
+  // {
+  //   path: '/administrator/roles',
+  //   name: 'administrator-roles', 
+  //   component: () => import('@/pages/administrator/roles.vue'),
+  //   // meta: {
+  //   //   requiresAuth: true,
+  //   //   navActiveLink: 'settings',
+  //   // },
+  // },
+
+  // ✅ Route untuk Kinerja Scada Dashboard
+  // {
+  //   path: '/dashboards/dashfasop/kinerjascada',
+  //   name: 'dashboards-dashfasop-kinerjascada',
+  //   component: () => import('@/pages/dashboards/dashfasop/kinerjascada.vue'),
+  //   // meta: {
+  //   //   requiresAuth: true,
+  //   //   navActiveLink: 'dashboards-dashfasop-kinerjascada',
+  //   // },
+  // },
+
 ]
