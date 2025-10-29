@@ -26,15 +26,18 @@ watch([isFallbackStateActive, refLoadingIndicator], () => {
     class="layout-wrapper layout-blank"
     data-allow-mismatch
   >
-    <RouterView #="{Component}">
-      <Suspense
-        :timeout="0"
-        @fallback="isFallbackStateActive = true"
-        @resolve="isFallbackStateActive = false"
-      >
-        <Component :is="Component" />
-      </Suspense>
-    </RouterView>
+<RouterView v-slot="{ Component }">
+  <Suspense
+    :timeout="0"
+    @fallback="isFallbackStateActive = true"
+    @resolve="isFallbackStateActive = false"
+  >
+    <template v-if="Component">
+      <Component :is="Component" />
+    </template>
+  </Suspense>
+</RouterView>
+
   </div>
 </template>
 

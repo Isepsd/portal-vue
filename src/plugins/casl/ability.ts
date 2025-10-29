@@ -1,4 +1,4 @@
-import { createMongoAbility } from '@casl/ability'
+import { createMongoAbility } from '@casl/ability';
 
 export type Actions = 'create' | 'read' | 'update' | 'delete' | 'manage'
 

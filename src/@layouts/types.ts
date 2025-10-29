@@ -1,6 +1,6 @@
 import type { OffsetOptions } from '@floating-ui/dom'
-import type { RouteLocationRaw } from 'vue-router'
 import type { AppContentLayoutNav, ContentWidth, FooterType, HorizontalNavType, NavbarType } from '@layouts/enums'
+import type { RouteLocationRaw } from 'vue-router'
 
 export interface LayoutConfig {
   app: {
@@ -24,8 +24,8 @@ export interface LayoutConfig {
     type: typeof FooterType[keyof typeof FooterType]
   }
   verticalNav: {
-    isVerticalNavCollapsed: boolean
-    defaultNavItemIconProps: unknown
+    isVerticalNavCollapsed: any
+    defaultNavItemIconProps: any
   }
   horizontalNav: {
     type: typeof HorizontalNavType[keyof typeof HorizontalNavType]
@@ -78,20 +78,20 @@ export interface NavLinkProps {
 
 export interface NavLink extends NavLinkProps, Partial<AclProperties> {
   title: string
-  icon?: unknown
+  icon?: any
   badgeContent?: string
   badgeClass?: string
-  disable?: boolean
+  disable?: any
 }
 
 // 👉 Vertical nav group
 export interface NavGroup extends Partial<AclProperties> {
   title: string
-  icon?: unknown
+  icon?: any
   badgeContent?: string
   badgeClass?: string
   children: (NavLink | NavGroup)[]
-  disable?: boolean
+  disable?: any
 }
 
 export declare type VerticalNavItems = (NavLink | NavGroup | NavSectionTitle)[]

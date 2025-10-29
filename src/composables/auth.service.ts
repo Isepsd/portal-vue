@@ -18,41 +18,6 @@ const AuthLoginService = ({ params = {}, cancelToken }: any) => {
     }
   );
 };
-// services/AuthLoginService.ts
-// const AuthLoginService = async ({
-//   params,
-//   cancelToken
-// }: {
-//   params: { username: string; password: string }
-//   cancelToken?: any
-// }) => {
-//   const { username, password } = params
-
-//   // Simulasi validasi statis: hanya user admin yang bisa login
-//   if (username !== 'admin' || password !== 'admin') {
-//     const error: any = new Error('Unauthorized')
-//     error.response = { data: { message: 'Invalid credentials' } }
-//     throw error
-//   }
-
-//   // Simulasi response token login
-//   return {
-//     access: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mn0.cat2xMrZLn0FwicdGtZNzL7ifDTAKWB0k1RurSWjdnw',
-//     refresh: 'fake-refresh-token',
-//     userData: {
-//       id: 1,
-//       fullName: 'John Doe',
-//       username: 'johndoe',
-//       email: 'admin@demo.com',
-//       role: 'admin',
-//       avatar: '/images/avatars/avatar-1.png',
-//       roleId: '1b4aa951-e537-483a-9b03-715f4062111e',
-//     },
-//     userAbilityRules: [
-//       { action: 'manage', subject: 'all' },
-//     ],
-//   }
-// }
 
 /**
  * AuthLoginService

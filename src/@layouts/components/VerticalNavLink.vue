@@ -1,9 +1,11 @@
 <script lang="ts" setup>
+import '@fortawesome/fontawesome-free/css/all.min.css'
 import { layoutConfig } from '@layouts'
 import { can } from '@layouts/plugins/casl'
 import { useLayoutConfigStore } from '@layouts/stores/config'
 import type { NavLink } from '@layouts/types'
 import { getComputedNavLinkToProp, getDynamicI18nProps, isNavLinkActive } from '@layouts/utils'
+
 
 defineProps<{
   item: NavLink
@@ -24,11 +26,11 @@ const hideTitleAndBadge = configStore.isVerticalNavMini()
       v-bind="getComputedNavLinkToProp(item)"
       :class="{ 'router-link-active router-link-exact-active': isNavLinkActive(item, $router) }"
     >
-      <Component
-        :is="layoutConfig.app.iconRenderer || 'div'"
-        v-bind="item.icon || layoutConfig.verticalNav.defaultNavItemIconProps"
-        class="nav-item-icon"
-      />
+    <Component
+      :is="layoutConfig.app.iconRenderer"
+      :class="[item.icon?.class || layoutConfig.verticalNav.defaultNavItemIconProps?.class, 'nav-item-icon']"
+    />
+
       <TransitionGroup name="transition-slide-x">
         <!-- 👉 Title -->
         <Component

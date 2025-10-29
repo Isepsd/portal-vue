@@ -1,6 +1,5 @@
-import { useAbility } from '@casl/vue'
-import type { RouteLocationNormalized } from 'vue-router'
 import type { NavGroup } from '@layouts/types'
+import type { RouteLocationNormalized } from 'vue-router'
 
 /**
  * Returns ability result if ACL is configured or else just return true
@@ -13,15 +12,19 @@ import type { NavGroup } from '@layouts/types'
  * @param {string} subject CASL Subject // https://casl.js.org/v4/en/guide/intro#basics
  */
 export const can = (action: string | undefined, subject: string | undefined) => {
-  const vm = getCurrentInstance()
+  // 🔹 TEMPORARILY DISABLE CASL - Show all menus
+  return true
 
-  if (!vm)
-    return false
+  // Original CASL logic (commented out)
+  // const vm = getCurrentInstance()
 
-  const localCan = vm.proxy && '$can' in vm.proxy
+  // if (!vm)
+  //   return false
 
-  // @ts-expect-error We will get TS error in below line because we aren't using $can in component instance
-  return localCan ? vm.proxy?.$can(action, subject) : true
+  // const localCan = vm.proxy && '$can' in vm.proxy
+
+  // // @ts-expect-error We will get TS error in below line because we aren't using $can in component instance
+  // return localCan ? vm.proxy?.$can(action, subject) : true
 }
 
 /**
@@ -41,16 +44,20 @@ export const canViewNavMenuGroup = (item: NavGroup) => {
 }
 
 export const canNavigate = (to: RouteLocationNormalized) => {
-  const ability = useAbility()
+  // 🔹 TEMPORARILY DISABLE CASL - Allow all routes
+  return true
 
-  // Get the most specific route (last one in the matched array)
-  const targetRoute = to.matched[to.matched.length - 1]
+  // Original CASL logic (commented out)
+  // const ability = useAbility()
 
-  // If the target route has specific permissions, check those first
-  if (targetRoute?.meta?.action && targetRoute?.meta?.subject)
-    return ability.can(targetRoute.meta.action, targetRoute.meta.subject)
+  // // Get the most specific route (last one in the matched array)
+  // const targetRoute = to.matched[to.matched.length - 1]
 
-  // If no specific permissions, fall back to checking if any parent route allows access
-  // @ts-expect-error We should allow passing string | undefined to can because for admin ability we omit defining action & subject
-  return to.matched.some(route => ability.can(route.meta.action, route.meta.subject))
+  // // If the target route has specific permissions, check those first
+  // if (targetRoute?.meta?.action && targetRoute?.meta?.subject)
+  //   return ability.can(targetRoute.meta.action, targetRoute.meta.subject)
+
+  // // If no specific permissions, fall back to checking if any parent route allows access
+  // // @ts-expect-error We should allow passing string | undefined to can because for admin ability we omit defining action & subject
+  // return to.matched.some(route => ability.can(route.meta.action, route.meta.subject))
 }

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { TransitionGroup } from 'vue'
+import '@fortawesome/fontawesome-free/css/all.min.css'
 import { layoutConfig } from '@layouts'
 import { TransitionExpand, VerticalNavLink } from '@layouts/components'
 import { canViewNavMenuGroup } from '@layouts/plugins/casl'
@@ -7,7 +7,7 @@ import { useLayoutConfigStore } from '@layouts/stores/config'
 import { injectionKeyIsVerticalNavHovered } from '@layouts/symbols'
 import type { NavGroup } from '@layouts/types'
 import { getDynamicI18nProps, isNavGroupActive, openGroups } from '@layouts/utils'
-
+import { TransitionGroup } from 'vue'
 defineOptions({
   name: 'VerticalNavGroup',
 })
@@ -157,11 +157,12 @@ watch(
       class="nav-group-label"
       @click="isGroupOpen = !isGroupOpen"
     >
-      <Component
-        :is="layoutConfig.app.iconRenderer || 'div'"
-        v-bind="item.icon || layoutConfig.verticalNav.defaultNavItemIconProps"
-        class="nav-item-icon"
-      />
+ <Component
+  :is="layoutConfig.app.iconRenderer || 'i'"
+  :class="typeof item.icon === 'string' && item.icon ? item.icon : (item.icon?.class || 'fa-solid fa-circle')"
+  class="nav-item-icon"
+/>
+
 
       <Component
         :is="TransitionGroup"

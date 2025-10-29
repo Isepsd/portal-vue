@@ -70,7 +70,7 @@ export const { themeConfig, layoutConfig } = defineThemeConfig({
   footer: { type: FooterType.Static },
   verticalNav: {
     isVerticalNavCollapsed: false,
-    defaultNavItemIconProps: { icon: 'tabler-circle' },
+    defaultNavItemIconProps: { class: 'tabler-circle' },
     isVerticalNavSemiDark: false,
   },
   horizontalNav: {

@@ -1,7 +1,7 @@
-import type { App } from 'vue'
-import { createI18n } from 'vue-i18n'
 import { cookieRef } from '@layouts/stores/config'
 import { themeConfig } from '@themeConfig'
+import type { App } from 'vue'
+import { createI18n } from 'vue-i18n'
 
 const messages = Object.fromEntries(
   Object.entries(
@@ -13,12 +13,15 @@ let _i18n: any = null
 
 export const getI18n = () => {
   if (_i18n === null) {
-    _i18n = createI18n({
-      legacy: false,
-      locale: cookieRef('language', themeConfig.app.i18n.defaultLocale).value,
-      fallbackLocale: 'en',
-      messages,
-    })
+  _i18n = createI18n({
+  legacy: false,
+  locale: cookieRef('language', themeConfig.app.i18n.defaultLocale).value,
+  fallbackLocale: 'en',
+  messages,
+  missingWarn: false,   // 🔹 hilangkan warning key hilang
+  fallbackWarn: false,  // 🔹 hilangkan warning fallback
+})
+
   }
 
   return _i18n

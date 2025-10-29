@@ -1,5 +1,6 @@
 import moment from 'moment'
 import { defineStore } from 'pinia'
+import { useNavigationStore } from './navigation'
 
 // Helper aman untuk parsing localStorage
 function safeParse(key: string) {
@@ -93,6 +94,10 @@ export const useAuthStore = defineStore('auth', {
       this.roleUser = null
       this.activeMenu = null
       this.sessionLifetime = { rememberMe: false, time: null }
+
+      // 🔹 Clear navigation store on logout
+      const navigationStore = useNavigationStore()
+      navigationStore.clearNavigation()
     },
 
     loadUser(payload: any) {
