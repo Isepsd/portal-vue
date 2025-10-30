@@ -121,14 +121,15 @@ const postSignin = async ({ username, password }: any) => {
     navigationStore.setNavigation(nestedMenus);
 
     // 6. Filter menu berdasarkan role & convert ke format vertical nav
-    const rolePrivileges = auth.roleAccess?.privileges || {};
-    const filteredMenu = filterMenuByRole(nestedMenus, rolePrivileges);
+    // const rolePrivileges:any = auth.roleAccess?.privileges || {};
+    // console
+    const filteredMenu = filterMenuByRole(nestedMenus, null);
     
     // console.log('🔍 Debug - filteredMenu:', JSON.stringify(filteredMenu, null, 2));
     
     const verticalNavItems = convertTreeToNav(filteredMenu);
     navigationStore.setVerticalNav(verticalNavItems);
-    // console.log('Step 6 completed:', verticalNavItems);
+    // console.log('Step 6 completed:', rolePrivileges);
     
     // 🔹 Set cookies setelah navigation siap
     const accessTokenCookie = useCookie<string>('accessToken');

@@ -1,28 +1,22 @@
-import store from '@store/index';
-import { stringToJSON } from './data.helper';
+import { useAuthStore } from '@/pages/stores/auth';
 
 /** GET ALL ROLES ACTION IN A MODULE */
 const ROLE_ACCESS = (module: string) => {
-  const access = store.getState().auth?.access;
+  const auth = useAuthStore(); 
+  const roleAccess: Record<string, string[]> = auth.roleAccess || {}; // ambil dari store
 
-  const getRoleAccess = stringToJSON(access?.privileges);
-
-  const roleAccess: any = getRoleAccess ? getRoleAccess : {};
-
-  if (roleAccess[module]) {
-    const priv = roleAccess[module];
-    return priv;
-  } else if (module == 'all') {
-    return roleAccess;
+  if (module === 'all') {
+    return roleAccess; // return seluruh module + action
   }
-  return [];
+
+  return roleAccess[module] || []; // return action untuk module tertentu
 };
 
 /** CHECK ROLE ACTION IN MODULE */
-const ROLE_ACTION = (roleAccess: any = [], action: string) => {
-  const priv = roleAccess.indexOf(action);
-  return priv >= 0 ? true : false;
+const ROLE_ACTION = (roleAccess: string[] = [], action: string) => {
+  if (!Array.isArray(roleAccess)) return false;
+  return roleAccess.includes(action); // true jika action ada
 };
 
-/** EXPORT FUNCTION */
 export { ROLE_ACCESS, ROLE_ACTION };
+
