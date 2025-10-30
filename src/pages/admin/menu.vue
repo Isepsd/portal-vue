@@ -3,6 +3,7 @@ import AccordionMenu from "@/components/helper/AccordionMenu.vue";
 import { JSONtoString, stringToJSON } from "@/components/helper/data.helper";
 import { initFlatMenu, initNestedMenu } from "@/components/helper/menu.helper";
 import { deleteByPath, getAllByPath, postByPath, putByPath } from "@/composables/main.service";
+import { useNavigationStore } from '@/pages/stores/navigation';
 
 import axios from "axios";
 import { onMounted, reactive, ref } from "vue";
@@ -11,6 +12,7 @@ import useVuelidate from "@vuelidate/core";
 import { required } from "@vuelidate/validators";
 
 const source = axios.CancelToken.source();
+const navigationStore = useNavigationStore()
 
 // STATE
 const nestedMenu = ref<any[]>([]);
@@ -80,6 +82,9 @@ const onSubmit = async () => {
       : await postByPath("menu", payload, source.token);
 
     await loadMenu();
+      // 🔹 Tambahkan ini supaya sidebar ikut update
+  await navigationStore.fetchNavigation();
+
     resetForm();
   } finally {
     loadingForm.value = false;
@@ -93,12 +98,16 @@ const editMenu = (item: any) => {
     ...item,
     privileges: item.privileges.map((priv: any) => ({ priv, checked: true })),
   });
+  
 };
 
 // DELETE
 const deleteMenu = async (item: any) => {
   await deleteByPath("menu", item.id, source.token);
+    await navigationStore.fetchNavigation();
+
   loadMenu();
+  
 };
 
 // RESET FORM
@@ -137,6 +146,14 @@ onMounted(loadMenu);
       @delete="deleteMenu"
       @move="moveMenu"
     />
+
+      <!-- Overlay Loading -->
+  <div
+    v-if="loading"
+    class="loading-overlay d-flex justify-center align-center"
+  >
+    <VProgressCircular indeterminate color="primary" size="48" />
+  </div>
   </VCol>
 
  <!-- RIGHT: FORM -->
@@ -240,3 +257,15 @@ onMounted(loadMenu);
 
 </template>
 
+
+<style scoped>
+*.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255,255,255,0.7);
+  z-index: 10;
+}
+</style>

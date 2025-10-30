@@ -67,6 +67,11 @@ export const routes: RouteRecordRaw[] = [
     name: 'apps-ecommerce-dashboard',
     component: () => import('@/pages/dashboards/ecommerce.vue'),
   },
+  {
+    path: '/notfound/notfound',
+    name: 'notfound-notfound',
+    component: () => import('@/pages/notfound/notfound.vue'),
+  },
 
    // ✅ Tambahan route untuk menu administrator → roles menu
 //   {
@@ -107,7 +112,20 @@ export const routes: RouteRecordRaw[] = [
   //   // meta: {
   //   //   requiresAuth: true,
   //   //   navActiveLink: 'dashboards-dashfasop-kinerjascada',
-  //   // },
+  //   },
   // },
 
+  // ✅ Routes untuk Pembangkit Form
+  {
+    path: '/jaringan/pembangkit/tambah',
+    name: 'jaringan-pembangkit-tambah',
+    component: () => import('@/pages/jaringan/component/form/FormPembangkit/pembangkit-form-page.vue'),
+    
+  },
+  {
+    path: '/jaringan/pembangkit/edit/:id',
+    name: 'jaringan-pembangkit-edit',
+    component: () => import('@/pages/jaringan/component/form/FormPembangkit/pembangkit-form-page.vue'),
+   
+  },
 ]

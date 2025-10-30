@@ -43,11 +43,13 @@ iconRenderer: defineComponent({
     popoverOffset: 0,
   },
 icons: {
-  chevronDown: { class: 'bi bi-chevron-down' },
-  chevronRight: { class: 'bi bi-chevron-right' },
-  close: { class: 'bi bi-x' },
-  verticalNavPinned: { class: 'bi bi-pin-angle-fill' },
-  verticalNavUnPinned: { class: 'bi bi-pin' },
-  sectionTitlePlaceholder: { class: 'bi bi-dash' },
+  // dashboard: { class: 'fa-solid fa-gauge' },
+  chevronDown: { class: 'fa-solid fa-chevron-down' },
+  chevronRight: { class: 'fa-solid fa-chevron-right' },
+  close: { class: 'fa-solid fa-xmark' },
+  verticalNavPinned: { class: 'fa-solid fa-thumbtack' },
+  verticalNavUnPinned: { class: 'fa-regular fa-bookmark' },
+  sectionTitlePlaceholder: { class: 'fa-solid fa-minus' },
 },
+
 }

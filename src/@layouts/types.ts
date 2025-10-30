@@ -81,8 +81,10 @@ export interface NavLink extends NavLinkProps, Partial<AclProperties> {
   icon?: any
   badgeContent?: string
   badgeClass?: string
-  disable?: any
+  disable?: boolean
+  privileges?: string[]   // ✅ array of action/privileges
 }
+
 
 // 👉 Vertical nav group
 export interface NavGroup extends Partial<AclProperties> {

@@ -3,13 +3,17 @@ import { stringToJSON } from '@/components/helper/data.helper';
 import { MENU } from "@/components/helper/menu.config";
 import { initNestedMenu } from '@/components/helper/menu.helper';
 import { getAllByPath, getByIdPath, putByPath } from '@/composables/main.service';
+import { useAuthStore } from '@/pages/stores/auth';
+import { useNavigationStore } from '@/pages/stores/navigation';
 import axios from 'axios';
 import { union } from "lodash";
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import SearchFilter from './components/SearchFilter.vue';
 import TreeTable from './components/TreeTable.vue';
-
+// ambil instance store
+const navigationStore = useNavigationStore()
+const auth = useAuthStore();
+const rolePrivileges:any = auth.roleAccess?.privileges || {};
 const route = useRoute();
 const router = useRouter();
 const id = route.query.id;
@@ -151,19 +155,40 @@ const filterByPrivilege = (items: any[], mode: 'assigned' | 'unassigned'): any[]
 
 // Save privileges
 const saveChangePrivileges = async () => {
-  loading.value = true;
-  await putByPath(
-    "roles",
-    {
-      ...dataModel.value,
-      privileges: JSON.stringify(privilegesModel.value),
-    },
-    id,
-    source.token
-  );
-  loading.value = false;
-  alert("✅ Berhasil menyimpan perubahan hak akses");
-};
+  try {
+    loading.value = true
+
+    // 🔹 Simpan perubahan hak akses ke backend
+    await putByPath(
+      'roles',
+      {
+        ...dataModel.value,
+        privileges: JSON.stringify(privilegesModel.value),
+      },
+      id,
+      source.token
+    )
+//  const reqUserDetail = await AuthUserDetailService(source.token);
+    // auth.setLoggedInUserDetail(reqUserDetail?.data);
+const user:any = auth.currentUser.roleId
+// console .log ("user",user)
+    // 🔹 Ambil roleAccess terbaru dari backend
+ const reqRole: any = await getByIdPath('roles', user, source.token);
+    const roleData = { ...reqRole?.results, privileges: stringToJSON(reqRole?.results?.privileges) };
+    auth.setRoleAccess(roleData);
+
+    // 🔹 Refresh menu navigation dengan rolePrivileges terbaru
+    await navigationStore.fetchNavigation()
+
+    alert('✅ Berhasil menyimpan perubahan hak akses')
+  } catch (error) {
+    console.error('❌ Gagal menyimpan perubahan:', error)
+    alert('Terjadi kesalahan saat menyimpan hak akses')
+  } finally {
+    loading.value = false
+  }
+}
+
 
 // Get menu data
 const getAllDataMenu = async () => {
@@ -222,13 +247,13 @@ onMounted(() => {
 
     <!-- Search and Filter Controls -->
     <div class="mb-4">
-      <SearchFilter
+      <!-- <SearchFilter
         v-model="searchQuery"
         v-model:filter-mode="filterMode"
         @update:modelValue="handleSearchQuery"
         @expand-all="handleExpandAll"
         @collapse-all="handleCollapseAll"
-      />
+      /> -->
     </div>
 
     <!-- Bulk Actions -->
