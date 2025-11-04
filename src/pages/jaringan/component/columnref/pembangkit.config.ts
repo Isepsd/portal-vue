@@ -43,3 +43,10 @@ export const PEMBANGKIT_COLUMNS = () => {
         },
   ]
 }
+
+export const JENIS_PEMBANGKIT_COLUMNS = () => {
+  return [
+    { headerName: 'Nama', field: 'nama', minWidth: 200 },
+  ]
+}
+
