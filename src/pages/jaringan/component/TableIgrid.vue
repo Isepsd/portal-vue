@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import DeleteConfirmDialog from '@/components/dialogs/DeleteConfirmDialog.vue';
 import { createAgGridTheme, getGlobalAgGridTheme, setGlobalAgGridTheme } from '@core/index';
 import { useConfigStore } from '@core/stores/config';
 import { ModuleRegistry } from 'ag-grid-community';
@@ -33,7 +34,7 @@ interface Props {
   editBtn?: boolean
   deleteBtn?: boolean
   onclickEdit?: (item: any) => void
-  onclickDelete?: (item: any) => void
+
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -41,7 +42,7 @@ const props = withDefaults(defineProps<Props>(), {
   editBtn: false,
   deleteBtn: false,
   onclickEdit: undefined,
-  onclickDelete: undefined
+
 })
 console.log("prmarykey",props.primaryKey)
 // 🧩 Register semua modul yang dibutuhkan
@@ -67,6 +68,41 @@ const totalData = ref(0)
 const totalPages = ref(0)
 const rowData = ref<any[]>([])
 const internalFilterValues = ref({ ...props.filterValues })
+
+// Dialog state
+const isDeleteDialogVisible = ref(false)
+const itemToDelete = ref<any>(null)
+
+// Delete handlers
+const handleDeleteClick = (item: any) => {
+  itemToDelete.value = item
+  isDeleteDialogVisible.value = true
+}
+
+const confirmDelete = async (itemId: string | number) => {
+  if (!itemId) return
+  await deleteData(itemId)
+}
+
+const cancelDelete = () => {
+  itemToDelete.value = null
+  isDeleteDialogVisible.value = false
+}
+
+const deleteData = async (itemId: string | number) => {
+  loading.value = true
+  try {
+    await deleteByPath(props.pathService, itemId, source.token)
+    console.log(`✅ Sukses menghapus data dengan ID: ${itemId}`)
+    await getData(internalFilterValues.value.page, internalFilterValues.value.limit)
+  } catch (err) {
+    console.error('❌ Gagal menghapus data:', err)
+  } finally {
+    loading.value = false
+    isDeleteDialogVisible.value = false
+  }
+}
+
 console.log('editbtn',props.editBtn)
 const gridTheme = getGlobalAgGridTheme()
 const configStore = useConfigStore()
@@ -263,8 +299,8 @@ const onCellClicked = (params: any) => {
   
   if (target.classList.contains("btn-edit") && props.onclickEdit && rowDataItem) {
     props.onclickEdit(rowDataItem);
-  } else if (target.classList.contains("btn-delete") && props.onclickDelete && rowDataItem) {
-    props.onclickDelete(rowDataItem);
+  } else if (target.classList.contains("btn-delete") && rowDataItem) {
+    handleDeleteClick(rowDataItem);
   }
 };
 // ⚙️ Default column setting
@@ -378,6 +414,14 @@ onMounted(() => {
         </div>
       </div>
     </div>
+
+    <!-- Delete Confirmation Dialog -->
+    <DeleteConfirmDialog
+      v-model:isDialogVisible="isDeleteDialogVisible"
+      :itemData="itemToDelete"
+      @confirm="confirmDelete"
+      @cancel="cancelDelete"
+    />
   </div>
 </template>
 
