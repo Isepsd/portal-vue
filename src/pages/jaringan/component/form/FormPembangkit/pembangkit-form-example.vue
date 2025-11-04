@@ -1,26 +1,23 @@
 <script setup lang="ts">
 import FormData from '@/@core/components/FormData.vue'
 import { API_PATH } from '@/composables/_path.service'
-// import { useEmit } from '@/composables/useemit'
+import { useEmit } from '@/composables/useemit'
 import { JarianganPembangkitField } from '@/pages/jaringan/component/interface/jaringan-pembangkit.interface'
 import { JENIS_LOKASI } from '@/pages/jaringan/component/jenis-lokasi.config'
-import { SINKRON_DATA } from '@/pages/jaringan/component/sinkron-data.config'
-// import { useAuthStore } from '@/pages/stores/auth'
-import FormMappingScada from '@/pages/jaringan/component/FormMappingScada.vue'
+import { useAuthStore } from '@/pages/stores/auth'
 import { showNotification } from '@/utils/notification'
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 
 // Route dan auth
 const route = useRoute()
-// const authStore = useAuthStore()
-// const { emitFilterChange } = useEmit()
+const authStore = useAuthStore()
+const { emitFilterChange } = useEmit()
 
 // Options untuk dropdown
 const unitIndukOptions = ref<any[]>([])
 const unitPembangkitOptions = ref<any[]>([])
 const jenisPembangkitOptions = ref<any[]>([])
-const sinkronDataOptions = ref(SINKRON_DATA)
 
 // Custom validation function
 const validatePembangkitForm = (formData: any): Record<string, string> => {
@@ -289,30 +286,20 @@ onMounted(async () => {
 
         <!-- Sinkron Data -->
         <VCol cols="12">
-          <VSelect
+          <VTextField
             v-model="form.sinkron_data"
-            label="Sinkron Data *"
-            placeholder="Pilih Sinkron Data"
+            label="Sinkron Data"
+            placeholder="Masukkan Sinkron Data"
             :error-messages="errors.sinkron_data"
-            :items="sinkronDataOptions"
-            item-title="label"
-            item-value="value"
             required
-            clearable
           />
         </VCol>
-
-        <!-- Conditional SCADA Fields -->
-        <FormMappingScada
-          :form="form"
-          :errors="errors"
-        />
 
         <!-- Submit Button -->
         <VCol cols="12" class="mt-4">
           <VBtn 
             color="primary" 
-            @click="async () => {
+            @click="() => {
               if (validateForm(validatePembangkitForm)) {
                 // Custom submit data preparation
                 const submitData = {
@@ -321,8 +308,8 @@ onMounted(async () => {
                   id_ref_jenis_lokasi: JENIS_LOKASI().pembangkit,
                   tree_jaringan: 1,
                 }
-                // Submit form dengan custom data
-                await submitForm(submitData)
+                // This will trigger the form submit through FormData component
+                // You can also emit custom event or call submit function directly
               }
             }"
             :loading="loading"

@@ -48,7 +48,8 @@ export function convertTreeToNav(
           : 'fa-regular fa-circle'
 
       const privileges = getPrivileges()[item.name || ''] || []
-      if (privileges.length === 0) return null
+      // 🔹 Hide menu if "view" privilege is not available
+      if (!privileges.includes('view')) return null
 
       if (item.children && item.children.length > 0) {
         const children = mapTree(item.children)

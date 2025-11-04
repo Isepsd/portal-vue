@@ -128,4 +128,16 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/pages/jaringan/component/form/FormPembangkit/pembangkit-form-page.vue'),
    
   },
+  {
+    path: '/jaringan/unitpembangkit/tambah',
+    name: 'jaringan-unitpembangkit-tambah',
+    component: () => import('@/pages/jaringan/component/form/FormUnitPembangkit/unit-pembangkit-form-page.vue'),
+    
+  },
+  {
+    path: '/jaringan/unitpembangkit/edit/:id',
+    name: 'jaringan-unitpembangkit-edit',
+    component: () => import('@/pages/jaringan/component/form/FormUnitPembangkit/unit-pembangkit-form-page.vue'),
+   
+  },
 ]

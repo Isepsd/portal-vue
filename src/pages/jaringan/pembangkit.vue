@@ -8,6 +8,7 @@ import { PEMBANGKIT_COLUMNS } from './component/columnref/pembangkit.config'
 import { JENIS_LOKASI } from './component/jenis-lokasi.config'
 
 const router = useRouter()
+
 const filterValues = ref<any>({
   id_ref_jenis_lokasi: JENIS_LOKASI().unit_pembangkit,
   sort_by: '-tgl_update,id_ref_lokasi',
@@ -22,7 +23,7 @@ const roleActions = reactive({
   update: true,
   delete: true,
 })
-const handleRespDataApiFallback = (data: any[], page: number, limit: number) =>
+const handleRespDataApi = (data: any[], page: number, limit: number) =>
   data.map((item: any, idx: number) => {
     // const status = item?.kesimpulan || 'INVALID'
     let alamat: string = item?.alamat;
@@ -67,12 +68,6 @@ const handleAdd = () => {
   router.push('/jaringan/pembangkit/tambah')
 }
 
-const handleDelete = (item: any) => {
-  if (confirm(`Yakin ingin menghapus ${item.id_ref_lokasi}?`)) {
-    console.log('Delete:', item)
-    // TODO: tambahkan API delete di sini
-  }
-}
 onMounted(() => {
   const roleAccess: any = ROLE_ACCESS('pembangkit')
   if (!roleAccess || !Array.isArray(roleAccess) || roleAccess.length === 0) {
@@ -91,43 +86,36 @@ onMounted(() => {
 })
 </script>
 <template>
-  
-    <!-- Header -->
  <!-- Header -->
-<VCard class="header-card mb-6 pa-4">
-  <VRow class="align-center">
-    <!-- Kolom kiri: ikon, judul, deskripsi, tombol -->
-    <VCol cols="12" md="8" class="d-flex align-start">
-      <VAvatar
-        size="48"
-        color="primary"
-        class="mr-4 elevation-2"
-      >
-        <VIcon icon="tabler-bolt" size="28" />
-      </VAvatar>
-
-      <div class="header-info">
-        <h2 class="header-title">Pembangkit</h2>
-        <p class="header-subtitle">
-          <!-- Kelola dan pantau informasi seluruh data pembangkit listrik di sistem Anda -->
-        </p>
-
-        <VBtn
-          v-if="roleActions.create"
+  <VCard class="header-card mb-6 pa-4">
+    <VRow class="align-center">
+      <!-- Kolom kiri: ikon, judul, deskripsi, tombol -->
+      <VCol cols="12" md="8" class="d-flex align-start">
+        <VAvatar
+          size="48"
           color="primary"
-          prepend-icon="tabler-plus"
-          class="elevated-btn mt-3"
-          @click="handleAdd"
+          class="mr-4 elevation-2"
         >
-          Tambah Pembangkit
-        </VBtn>
-      </div>
-    </VCol>
+          <!-- <VIcon icon="tabler-bolt" size="28" /> -->
+        </VAvatar>
 
-    <!-- Kolom kanan bisa dikosongkan atau dipakai nanti -->
-    <!-- <VCol cols="12" md="4"></VCol> -->
-  </VRow>
-</VCard>
+        <div class="header-info">
+          <h2 class="header-title">Pembangkit</h2>
+          <p class="header-subtitle">
+          </p>
+          <VBtn
+            v-if="roleActions.create"
+            color="primary"
+            prepend-icon="tabler-plus"
+            class="elevated-btn mt-3"
+            @click="handleAdd"
+          >
+            Tambah Pembangkit
+          </VBtn>
+        </div>
+      </VCol>
+    </VRow>
+  </VCard>
 
 
     <!-- Table -->
@@ -135,13 +123,11 @@ onMounted(() => {
       :editBtn="roleActions?.update"
       :deleteBtn="roleActions?.delete"
       :onclickEdit="handleEdit"
-      :onclickDelete="handleDelete"
       :column="columnDefs"
       :filterValues="filterValues"
       :pathService="API_PATH().master.jaringan.ref_lokasi"
-      :handleRespDataApi="handleRespDataApiFallback"
+      :handleRespDataApi="handleRespDataApi"
       primaryKey="id_ref_lokasi"
     />
 
 </template>
-
