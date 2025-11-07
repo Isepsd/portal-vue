@@ -152,4 +152,112 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/pages/jaringan/component/form/FormJenisPembangkit/jenis-pembangkit-form-page.vue'),
    
   },
+  {
+    path: '/masteropsisdis/kelompokgangguan/tambah',
+    name: 'masteropsisdis-kelompokgangguan-tambah',
+    component: () => import('@/pages/masteropsisdis/component/form/FormKelompokGangguan/kelompok-gangguan-form-page.vue'),
+    
+  },
+  {
+    path: '/masteropsisdis/kelompokgangguan/edit/:id',
+    name: 'masteropsisdis-kelompokgangguan-edit',
+    component: () => import('@/pages/masteropsisdis/component/form/FormKelompokGangguan/kelompok-gangguan-form-page.vue'),
+   
+  },
+  {
+    path: '/masteropsisdis/dampakkerusakan/tambah',
+    name: 'masteropsisdis-dampakkerusakan-tambah',
+    component: () => import('@/pages/masteropsisdis/component/form/Formdampakkerusakan/dampak-kerusakan-form-page.vue'),
+    
+  },
+  {
+    path: '/masteropsisdis/dampakkerusakan/edit/:id',
+    name: 'masteropsisdis-dampakkerusakan-edit',
+    component: () => import('@/pages/masteropsisdis/component/form/Formdampakkerusakan/dampak-kerusakan-form-page.vue'),
+   
+  },
+  {
+    path: '/masteropsisdis/equipment/tambah',
+    name: 'masteropsisdis-equipment-tambah',
+    component: () => import('@/pages/masteropsisdis/component/form/Formequipment/equipment-form-page.vue'),
+    
+  },
+  {
+    path: '/masteropsisdis/equipment/edit/:id',
+    name: 'masteropsisdis-equipment-edit',
+    component: () => import('@/pages/masteropsisdis/component/form/Formequipment/equipment-form-page.vue'),
+   
+  },
+  {
+    path: '/masteropsisdis/subfasilitas/tambah',
+    name: 'masteropsisdis-subfasilitas-tambah',
+    component: () => import('@/pages/masteropsisdis/component/form/Formsubfasilitas/subfasilitas-form-page.vue'),
+    
+  },
+  {
+    path: '/masteropsisdis/subfasilitas/edit/:id',
+    name: 'masteropsisdis-subfasilitas-edit',
+    component: () => import('@/pages/masteropsisdis/component/form/Formsubfasilitas/subfasilitas-form-page.vue'),
+   
+  },
+  {
+    path: '/masteropsisdis/fasilitas/tambah',
+    name: 'masteropsisdis-fasilitas-tambah',
+    component: () => import('@/pages/masteropsisdis/component/form/Formfasilitas/fasilitas-form-page.vue'),
+    
+  },
+  {
+    path: '/masteropsisdis/fasilitas/edit/:id',
+    name: 'masteropsisdis-fasilitas-edit',
+    component: () => import('@/pages/masteropsisdis/component/form/Formfasilitas/fasilitas-form-page.vue'),
+   
+  },
+  {
+    path: '/masteropsisdis/penyebabgangguan/tambah',
+    name: 'masteropsisdis-penyebabgangguan-tambah',
+    component: () => import('@/pages/masteropsisdis/component/form/Formpenyebabgangguan/penyebabgangguan-form-page.vue'),
+    
+  },
+  {
+    path: '/masteropsisdis/penyebabgangguan/edit/:id',
+    name: 'masteropsisdis-penyebabgangguan-edit',
+    component: () => import('@/pages/masteropsisdis/component/form/Formpenyebabgangguan/penyebabgangguan-form-page.vue'),
+   
+  },
+  {
+    path: '/masteropsisdis/cuaca/tambah',
+    name: 'masteropsisdis-cuaca-tambah',
+    component: () => import('@/pages/masteropsisdis/component/form/Formcuaca/cuaca-form-page.vue'),
+    
+  },
+  {
+    path: '/masteropsisdis/cuaca/edit/:id',
+    name: 'masteropsisdis-cuaca-edit',
+    component: () => import('@/pages/masteropsisdis/component/form/Formcuaca/cuaca-form-page.vue'),
+   
+  },
+  {
+    path: '/masteropsisdis/indikasi/tambah',
+    name: 'masteropsisdis-indikasi-tambah',
+    component: () => import('@/pages/masteropsisdis/component/form/Formindikasi/indikasi-form-page.vue'),
+    
+  },
+  {
+    path: '/masteropsisdis/indikasi/edit/:id',
+    name: 'masteropsisdis-indikasi-edit',
+    component: () => import('@/pages/masteropsisdis/component/form/Formindikasi/indikasi-form-page.vue'),
+   
+  },
+  {
+    path: '/masteropsisdis/dispatcher/tambah',
+    name: 'masteropsisdis-dispatcher-tambah',
+    component: () => import('@/pages/masteropsisdis/component/form/Formdispatcher/dispatcher-form-page.vue'),
+    
+  },
+  {
+    path: '/masteropsisdis/dispatcher/edit/:id',
+    name: 'masteropsisdis-dispatcher-edit',
+    component: () => import('@/pages/masteropsisdis/component/form/Formdispatcher/dispatcher-form-page.vue'),
+   
+  },
 ]
