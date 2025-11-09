@@ -3,15 +3,17 @@ import { ROLE_ACCESS, ROLE_ACTION } from '@/components/helper/auth.helper'
 import { API_PATH } from '@/composables/_path.service'
 import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { PEMBANGKIT_COLUMNS } from '../component/columnref/realtime.config'
-import TableIgrid from '../component/TableIgrid.vue'
+import { PEMBANGKIT_COLUMNS } from '../component/columnref/pembangkit.config'
+import { JENIS_LOKASI } from '../component/jenis-lokasi.config'
+import TableIgrid from './component/TableIgrid.vue'
 
 const router = useRouter()
 
 const filterValues = ref<any>({
+  id_ref_jenis_lokasi: JENIS_LOKASI().unit_pembangkit,
+  sort_by: '-tgl_update,id_ref_lokasi',
   page: 1,
   limit: 10,
-  id_induk_pointtype: '3d391819-4288-4699-80f4-7ebd5ae0d733',
 })
 const columnDefs = ref(PEMBANGKIT_COLUMNS())
 // Default role (bisa diubah setelah load)
@@ -24,29 +26,36 @@ const roleActions = reactive({
 const handleRespDataApi = (data: any[], page: number, limit: number) =>
   data.map((item: any, idx: number) => {
     // const status = item?.kesimpulan || 'INVALID'
-    const status = item?.kesimpulan || 'INVALID'
-    const color =
-      status === 'VALID'
-        ? '#198754'
-        : status === 'INVALID'
-        ? '#dc3545'
-        : '#6c757d'
+    let alamat: string = item?.alamat;
+      if (item?.ref_district) {
+        alamat += ", " + item?.ref_district?.name
+      }
+      if (item?.ref_regency) {
+        alamat += ", " + item?.ref_regency?.name
+      }
+      if (item?.ref_province) {
+        alamat += ", " + item?.ref_province?.name
+      }
     return {
       number: (page - 1) * limit + idx + 1,
-      point_number: item?.point_number ?? '-',
-      nama_pointtype: item?.nama_pointtype ?? '-',
-      path1: item?.path1 ?? '-',
-      path2: item?.path2 ?? '-',
-      path3: item?.path3 ?? '-',
-      path4: item?.path4 ?? '-',
-      path5: item?.path5 ?? '-',
-      status_2: item?.status_2 ?? '-',
-      datum_2: item?.datum_2 ?? '-',
-      durasi: item?.durasi ?? '-',
-      value: item?.value ?? '-',
-      datum_capture: item?.datum_capture ?? '-',
-      kesimpulan: status,
-      color,
+   id_ref_lokasi: item?.id_ref_lokasi,
+        id: item?.id,
+        nama: item?.nama_lokasi,
+        nama_pemilik: item?.nama_pemilik,
+        parent_lokasi: item?.parent_lokasi?.nama_lokasi,
+        alamat: item?.alamat,
+        lat: item?.lat,
+        no_urut: item?.no_urut,
+        lon: item?.lon,
+        path1: item?.path1,
+        path2: item?.path2,
+        path3: item?.path3,
+        id_i: item?.id_i ? item?.id_i : "",
+        id_v: item?.id_v ? item?.id_v : "",
+        id_p: item?.id_p ? item?.id_p : "",
+        id_amr: item?.id_amr ? item?.id_amr : "",
+        id_portal_ext: item?.id_portal_ext ? item?.id_portal_ext : "",
+        url_webservice: item?.url_webservice ? item?.url_webservice : "",
     }
   })
 
@@ -76,10 +85,11 @@ onMounted(() => {
 
 })
 
-const handleFilterChange = (newFilterValues: any) => {
-  filterValues.value = { ...filterValues.value, ...newFilterValues }
-  // getData(filterValues.value.page, filterValues.value.limit)
-}
+  const handleFilterChange = (newFilterValues: any) => {
+  filterValues.value = newFilterValues;
+  // Call the getAllData to fetch data after filter change
+
+};
 </script>
 <template>
  <!-- Header -->
@@ -113,13 +123,14 @@ const handleFilterChange = (newFilterValues: any) => {
 
     <!-- Table -->
     <TableIgrid
-   
+      :editBtn="roleActions?.update"
+      :deleteBtn="roleActions?.delete"
       :onclickEdit="handleEdit"
       :column="columnDefs"
       :filterValues="filterValues"
-      :pathService="API_PATH().fasop.realtime.digital"
+      :pathService="API_PATH().master.jaringan.ref_lokasi"
       :handleRespDataApi="handleRespDataApi"
-      primaryKey=""
+      primaryKey="id_ref_lokasi"
     />
 
 </template>

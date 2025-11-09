@@ -16,7 +16,7 @@ export default [
       {
         title: 'FASOP',
         children: [
-          { title: 'Kinerja SCADA', to: 'dashboards-dashfasop-kinerjascada' },
+          { title: 'Kinerja SCADA', to: 'dashboard-dashfasop-kinerjascada' },
           { title: 'Monitoring RTU', to: 'dashboards-dashfasop-monitoringrtu' },
           { title: 'Monitoring Gangguan', to: 'dashboards-dashfasop-monitoringgangguanscada' },
         ],
