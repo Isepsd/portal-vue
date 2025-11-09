@@ -170,7 +170,7 @@ const postSignin = async ({ username, password }: any) => {
     
     // console.log('🚀 Navigating to dashboard...');
     // Gunakan router.push dengan path yang benar
-    await router.push('/dashboards/dashfasop/kinerjascada');
+    await router.push('/dashboard/dashfasop/kinerjascada');
 
   } catch (error: any) {
     console.error('❌ Login error:', error);

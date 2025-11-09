@@ -4,7 +4,7 @@ const router = useRouter()
 
 // Direct ke dashboard tanpa API checks
 onMounted(() => {
-  router.push('/dashboards/dashfasop/kinerjascada')
+  router.push('/dashboard/dashfasop/kinerjascada')
 })
 </script>
 

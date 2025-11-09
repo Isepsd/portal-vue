@@ -79,42 +79,42 @@ const toggleSetAllPrivileges = (payload: any) => {
 };
 
 // Handle bulk actions
-const handleBulkAssign = (data: { privilege: string; checked: boolean }) => {
-  menuPrivileges.value.forEach((menu: any) => {
-    if (menu.privileges.includes(data.privilege)) {
-      toggleSetPrivilegesModel({ name: menu.name, privileges: data.privilege });
-    }
-  });
-};
+// const handleBulkAssign = (data: { privilege: string; checked: boolean }) => {
+//   menuPrivileges.value.forEach((menu: any) => {
+//     if (menu.privileges.includes(data.privilege)) {
+//       toggleSetPrivilegesModel({ name: menu.name, privileges: data.privilege });
+//     }
+//   });
+// };
 
 // Handle expand/collapse
-const handleExpand = (nodeId: string) => {
-  if (expandedNodes.value.has(nodeId)) {
-    expandedNodes.value.delete(nodeId);
-  } else {
-    expandedNodes.value.add(nodeId);
-  }
-};
+// const handleExpand = (nodeId: string) => {
+//   if (expandedNodes.value.has(nodeId)) {
+//     expandedNodes.value.delete(nodeId);
+//   } else {
+//     expandedNodes.value.add(nodeId);
+//   }
+// };
 
-const handleExpandAll = () => {
-  const allNodeIds = menuPrivileges.value.map((menu: any) => menu.id);
-  expandedNodes.value = new Set(allNodeIds);
-};
+// const handleExpandAll = () => {
+//   const allNodeIds = menuPrivileges.value.map((menu: any) => menu.id);
+//   expandedNodes.value = new Set(allNodeIds);
+// };
 
-const handleCollapseAll = () => {
-  expandedNodes.value.clear();
-};
+// const handleCollapseAll = () => {
+//   expandedNodes.value.clear();
+// };
 
-// Check single privilege
-const checkPriv = (name: string, privilege: string) =>
-  privilegesModel.value[name]?.includes(privilege) ?? false;
+// // Check single privilege
+// const checkPriv = (name: string, privilege: string) =>
+//   privilegesModel.value[name]?.includes(privilege) ?? false;
 
-// Check if all privileges selected
-const checkAllPriv = (name: string, privList: any[]) => {
-  return privList.every((val) =>
-    privilegesModel.value[name]?.includes(val)
-  );
-};
+// // Check if all privileges selected
+// const checkAllPriv = (name: string, privList: any[]) => {
+//   return privList.every((val) =>
+//     privilegesModel.value[name]?.includes(val)
+//   );
+// };
 
 // Filter functions
 const filterBySearch = (items: any[], query: string): any[] => {
@@ -215,13 +215,13 @@ const getDataById = async () => {
 };
 
 // Watch for search query changes
-const handleSearchQuery = (query: string) => {
-  searchQuery.value = query;
-  if (query) {
-    // Auto-expand nodes with search results
-    handleExpandAll();
-  }
-};
+// const handleSearchQuery = (query: string) => {
+//   searchQuery.value = query;
+//   if (query) {
+//     // Auto-expand nodes with search results
+//     handleExpandAll();
+//   }
+// };
 
 onMounted(() => {
   getDataById();

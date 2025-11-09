@@ -13,7 +13,7 @@ export const redirects: RouteRecordRaw[] = [
       // TODO: Get type from backend
 
 
-      return { name: 'dashboards-dashfasop-kinerjascada', query: to.query }
+   return { name: 'dashboard-dashfasop-kinerjascada', query: to.query }
     },
   },
   {
