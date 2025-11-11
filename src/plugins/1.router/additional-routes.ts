@@ -260,4 +260,16 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/pages/masteropsisdis/component/form/Formdispatcher/dispatcher-form-page.vue'),
    
   },
+  {
+    path: '/jaringan/garduinduk/tambah',
+    name: 'jaringan-garduinduk-tambah',
+    component: () => import('@/pages/jaringan/component/form/Formgarduinduk/gardu-induk-form-page.vue'),
+    
+  },
+  {
+    path: '/jaringan/garduinduk/edit/:id',
+    name: 'jaringan-garduinduk-edit',
+    component: () => import('@/pages/jaringan/component/form/Formgarduinduk/gardu-induk-form-page.vue'),
+   
+  },
 ]
