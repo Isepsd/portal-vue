@@ -55,9 +55,9 @@ const handleEdit = (item: any) => {
   router.push(`/jaringan/pembangkit/edit/${item.id_ref_lokasi}`)
 }
 
-const handleAdd = () => {
-  router.push('/jaringan/pembangkit/tambah')
-}
+// const handleAdd = () => {
+//   router.push('/jaringan/pembangkit/tambah')
+// }
 
 onMounted(() => {
   const roleAccess: any = ROLE_ACCESS('pembangkit')
@@ -82,34 +82,13 @@ const handleFilterChange = (newFilterValues: any) => {
 }
 </script>
 <template>
- <!-- Header -->
-  <VCard class="header-card mb-6 pa-4">
-    <VRow class="align-center">
-      <VCol cols="12">
+
+  <VCol cols="12">
     <AppCardCode title="Filter" :code="{ ts: '', js: '' }">
       <FillterFasopRealTime :onFilterChange="handleFilterChange" />
     </AppCardCode>
   </VCol>
-      <!-- Kolom kiri: ikon, judul, deskripsi, tombol -->
-      <VCol cols="12" md="8" class="d-flex align-start">
-        <VAvatar
-          size="48"
-          color="primary"
-          class="mr-4 elevation-2"
-        >
-          <!-- <VIcon icon="tabler-bolt" size="28" /> -->
-        </VAvatar>
-
-        <div class="header-info">
-          <h2 class="header-title">RTU</h2>
-          <p class="header-subtitle">
-          </p>
-         
-        </div>
-      </VCol>
-    </VRow>
-  </VCard>
-
+  
 
     <!-- Table -->
     <TableIgrid
