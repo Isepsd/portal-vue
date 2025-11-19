@@ -1,16 +1,33 @@
 import { convertTreeToNav } from '@/@core/utils/convertTreeToNav'
 import { useAuthStore } from '@/pages/stores/auth'
 import { useNavigationStore } from '@/pages/stores/navigation'
-import { computed, onMounted, ref, toRaw } from 'vue'
+import { computed, onMounted, ref, toRaw, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 export function useVerticalNav() {
   const navigationStore = useNavigationStore()
   const authStore = useAuthStore()
   const router = useRouter()
+  const userData = useCookie<any>('userData')
 
   const isLoading = ref(true)
   const isInitialized = ref(false)
+
+  // 🔹 Fungsi logout otomatis
+  const autoLogout = async () => {
+    console.warn('⚠️ Navigation kosong — logout otomatis dilakukan.')
+    try {
+      // Hapus token dan data user
+      useCookie('accessToken').value = null
+      useCookie('userAbilityRules').value = null
+      userData.value = null
+
+      // Redirect ke halaman login
+      await router.push('/login')
+    } catch (err) {
+      console.error('Gagal logout otomatis:', err)
+    }
+  }
 
   onMounted(() => {
     isLoading.value = false
@@ -18,24 +35,26 @@ export function useVerticalNav() {
   })
 
   const verticalNavItems = computed(() => {
-    // console.log('=== DEBUG useVerticalNav ===')
-    // console.log('Navigation Store:', navigationStore.navigation)
-    // console.log('Router available:', !!router)
+    const convertedNavigation =
+      convertTreeToNav(toRaw(navigationStore.navigation), router, authStore) || []
 
-    // 🔹 Convert navigation dari store, dengan router dan auth
-    const convertedNavigation = convertTreeToNav(
-      toRaw(navigationStore.navigation),
-      router,
-      authStore
-    ) || []
-
-    // 🔹 Spread array murni, bukan ComputedRef
-    const navItems = [...convertedNavigation]
-
-    // console.log('✅ Final Vertical Nav Items:', navItems)
-    // console.log('===========================')
-    return navItems
+    return [...convertedNavigation]
   })
+
+  // 🔹 Pantau jika navigation kosong → logout otomatis
+  watch(
+    () => verticalNavItems.value,
+    async (newNav) => {
+      if (
+        isInitialized.value &&
+        !isLoading.value &&
+        (!newNav || newNav.length === 0)
+      ) {
+        await autoLogout()
+      }
+    },
+    { immediate: true }
+  )
 
   const isNavigationReady = computed(() => verticalNavItems.value.length > 0)
 

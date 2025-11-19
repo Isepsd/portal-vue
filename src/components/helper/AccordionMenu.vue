@@ -155,7 +155,7 @@ const collapseAll = () => {
 
 <style scoped>
 .accordion-menu {
-  background: linear-gradient(135deg, #ffffff 0%, #fafbff 100%);
+ 
   padding: 16px;
   border-radius: 12px;
   border: 1px solid #e0e0e0;

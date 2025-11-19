@@ -447,15 +447,15 @@ onMounted(loadMenu);
 <style scoped>
 .menu-management-container {
   padding: 24px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+
   min-height: 100vh;
 }
 
 .page-header {
-  background: white;
+
   padding: 24px;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
 }
 
 .menu-list-card,
@@ -471,10 +471,8 @@ onMounted(loadMenu);
 }
 
 .form-section {
-  background: #fafafa;
   padding: 16px;
   border-radius: 8px;
-  border: 1px solid #e0e0e0;
 }
 
 .form-status {
@@ -484,7 +482,7 @@ onMounted(loadMenu);
 
 .privileges-container {
   border: 1px solid #e0e0e0;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+ 
 }
 
 .empty-state {
@@ -530,23 +528,17 @@ onMounted(loadMenu);
 }
 
 .menu-list-card ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+
   border-radius: 3px;
 }
 
 .menu-list-card ::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+
   border-radius: 3px;
 }
 
-.menu-list-card ::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
-}
 
-/* Enhanced focus states */
-:deep(.v-field--focused) {
-  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
-}
+
 
 /* Button hover effects */
 :deep(.v-btn:hover) {
@@ -554,12 +546,5 @@ onMounted(loadMenu);
   transition: all 0.2s ease;
 }
 
-/* Card header gradient */
-:deep(.bg-primary-light) {
-  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-}
 
-:deep(.bg-warning-light) {
-  background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
-}
 </style>
