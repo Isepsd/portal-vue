@@ -188,7 +188,68 @@
     }
   }
 }
+/* 🌈 Page Wrapper */
+.pembangkit-page {
+  padding: 16px;
+  background: linear-gradient(135deg, #f6f8fc, #eef1f6);
+  min-height: 100vh;
+}
 
+/* 🪞 Header Card */
+.header-card {
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(200, 200, 200, 0.3);
+  transition: all 0.3s ease;
+}
+
+.header-card:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+.header-info {
+  display: flex;
+  flex-direction: column;
+}
+/* ⚡ Title & Subtitle */
+.header-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #1976d2, #42a5f5);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 4px;
+}
+
+.header-subtitle {
+  font-size: 0.95rem;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+
+/* 🎨 Button Styling */
+.elevated-btn {
+  align-self: flex-start; /* Pastikan tombol nempel di kiri */
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(25, 118, 210, 0.25);
+  transition: all 0.25s ease;
+}
+
+.elevated-btn:hover {
+  box-shadow: 0 6px 14px rgba(25, 118, 210, 0.35);
+  transform: translateY(-2px);
+}
+
+/* ✨ Avatar Icon */
+.v-avatar {
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.25);
+}
 // 👉 Switch
 .v-switch .v-selection-control:not(.v-selection-control--dirty) .v-switch__thumb {
   color: #fff !important;

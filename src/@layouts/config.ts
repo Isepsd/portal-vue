@@ -1,6 +1,8 @@
-import { breakpointsVuetify } from '@vueuse/core'
+import '@fortawesome/fontawesome-free/css/all.min.css'
 import { AppContentLayoutNav, ContentWidth, FooterType, HorizontalNavType, NavbarType } from '@layouts/enums'
 import type { LayoutConfig } from '@layouts/types'
+import { breakpointsVuetify } from '@vueuse/core'
+
 
 export const layoutConfig: LayoutConfig = {
   app: {
@@ -14,7 +16,15 @@ export const layoutConfig: LayoutConfig = {
     i18n: {
       enable: true,
     },
-    iconRenderer: h('div'),
+iconRenderer: defineComponent({
+  name: 'IconRenderer',
+  inheritAttrs: true, // wajib biar class ikut ke <i>
+  render() {
+    return h('i')
+  },
+}),
+
+
   },
   navbar: {
     type: NavbarType.Sticky,
@@ -24,20 +34,22 @@ export const layoutConfig: LayoutConfig = {
     type: FooterType.Static,
   },
   verticalNav: {
-    isVerticalNavCollapsed: false,
-    defaultNavItemIconProps: { icon: 'tabler-circle' },
-  },
+  isVerticalNavCollapsed: false,
+  defaultNavItemIconProps: { class: 'fa-regular fa-circle' }, // ✅ Bootstrap default
+},
   horizontalNav: {
     type: HorizontalNavType.Sticky,
     transition: 'none',
     popoverOffset: 0,
   },
-  icons: {
-    chevronDown: { icon: 'tabler-chevron-down' },
-    chevronRight: { icon: 'tabler-chevron-right' },
-    close: { icon: 'tabler-x' },
-    verticalNavPinned: { icon: 'tabler-circle-dot' },
-    verticalNavUnPinned: { icon: 'tabler-circle' },
-    sectionTitlePlaceholder: { icon: 'tabler-minus' },
-  },
+icons: {
+  // dashboard: { class: 'fa-solid fa-gauge' },
+  chevronDown: { class: 'fa-solid fa-chevron-down' },
+  chevronRight: { class: 'fa-solid fa-chevron-right' },
+  close: { class: 'fa-solid fa-xmark' },
+  verticalNavPinned: { class: 'fa-solid fa-thumbtack' },
+  verticalNavUnPinned: { class: 'fa-regular fa-bookmark' },
+  sectionTitlePlaceholder: { class: 'fa-solid fa-minus' },
+},
+
 }

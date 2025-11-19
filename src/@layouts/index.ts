@@ -1,14 +1,16 @@
-import type { PartialDeep } from 'type-fest'
-import type { Plugin } from 'vue'
+import { useConfigStore } from '@core/stores/config'
 import { layoutConfig } from '@layouts/config'
 import { cookieRef, useLayoutConfigStore } from '@layouts/stores/config'
 import type { LayoutConfig } from '@layouts/types'
 import { _setDirAttr } from '@layouts/utils'
+import type { PartialDeep } from 'type-fest'
+import type { Plugin } from 'vue'
 
 // 🔌 Plugin
 export const createLayouts = (userConfig: PartialDeep<LayoutConfig>): Plugin => {
   return (): void => {
-    const configStore = useLayoutConfigStore()
+    // 🔹 Fix: Gunakan useConfigStore yang benar (wrapper dari @core)
+    const configStore = useConfigStore()
 
     // Non reactive Values
     layoutConfig.app.title = userConfig.app?.title ?? layoutConfig.app.title
@@ -27,23 +29,22 @@ export const createLayouts = (userConfig: PartialDeep<LayoutConfig>): Plugin => 
     layoutConfig.icons.sectionTitlePlaceholder = userConfig.icons?.sectionTitlePlaceholder ?? layoutConfig.icons.sectionTitlePlaceholder
 
     // Reactive Values (Store)
-    configStore.$patch({
+    const layoutConfigStore = useLayoutConfigStore()
+    layoutConfigStore.$patch({
       appContentLayoutNav: cookieRef('appContentLayoutNav', userConfig.app?.contentLayoutNav ?? layoutConfig.app.contentLayoutNav).value,
       appContentWidth: cookieRef('appContentWidth', userConfig.app?.contentWidth ?? layoutConfig.app.contentWidth).value,
       footerType: cookieRef('footerType', userConfig.footer?.type ?? layoutConfig.footer.type).value,
       navbarType: cookieRef('navbarType', userConfig.navbar?.type ?? layoutConfig.navbar.type).value,
       isNavbarBlurEnabled: cookieRef('isNavbarBlurEnabled', userConfig.navbar?.navbarBlur ?? layoutConfig.navbar.navbarBlur).value,
       isVerticalNavCollapsed: cookieRef('isVerticalNavCollapsed', userConfig.verticalNav?.isVerticalNavCollapsed ?? layoutConfig.verticalNav.isVerticalNavCollapsed).value,
-
-      // isAppRTL: userConfig.app?.isRTL ?? config.app.isRTL,
-      // isLessThanOverlayNavBreakpoint: false,
       horizontalNavType: cookieRef('horizontalNavType', userConfig.horizontalNav?.type ?? layoutConfig.horizontalNav.type).value,
     })
 
-    // _setDirAttr(config.app.isRTL ? 'rtl' : 'ltr')
+    // 🔹 Fix: Gunakan isAppRTL dari configStore yang benar
     _setDirAttr(configStore.isAppRTL ? 'rtl' : 'ltr')
   }
 }
 
 export * from './components'
 export { layoutConfig }
+

@@ -1,11 +1,34 @@
-import type { VerticalNavItems } from '@layouts/types'
-import appsAndPages from './apps-and-pages'
-import charts from './charts'
-import dashboard from './dashboard'
-import fasop from './fasop'
-import forms from './forms'
-import opsisdis from './opsisdis'
-import others from './others'
-import uiElements from './ui-elements'
+import { convertTreeToNav } from '@/@core/utils/convertTreeToNav'
+import { useAuthStore } from '@/pages/stores/auth'
+import { useNavigationStore } from '@/pages/stores/navigation'
+import { computed, onMounted, ref, toRaw } from 'vue'
+import { useRouter } from 'vue-router'
 
-export default [...dashboard,...fasop,...opsisdis, ...appsAndPages, ...uiElements, ...forms, ...charts, ...others] as VerticalNavItems
+export function useVerticalNav() {
+  const navigationStore = useNavigationStore()
+  const authStore = useAuthStore()
+  const router = useRouter()
+ 
+  const isLoading = ref(true)
+  const isInitialized = ref(false)
+
+  onMounted(() => {
+    isLoading.value = false
+    isInitialized.value = true
+  })
+
+  const verticalNavItems = computed(() => {
+    const convertedNavigation =
+      convertTreeToNav(toRaw(navigationStore.navigation), router, authStore) || []
+
+    return [...convertedNavigation]
+  })
+
+  const isNavigationReady = computed(() => verticalNavItems.value.length > 0)
+
+  return {
+    verticalNavItems,
+    isLoading: computed(() => isLoading.value),
+    isNavigationReady,
+  }
+}

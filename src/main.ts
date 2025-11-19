@@ -8,12 +8,14 @@ import { registerPlugins } from '@core/utils/plugins'
 import '@core/scss/template/index.scss'
 import '@styles/styles.scss'
 
+// 🔹 Initialize Pinia BEFORE creating app
+const pinia = createPinia()
 
 // Create vue app
 const app = createApp(App)
 
-// Register Pinia (harus sebelum mount!)
-app.use(createPinia())
+// 🔹 Register Pinia
+app.use(pinia)
 
 // Register plugins
 registerPlugins(app)

@@ -44,3 +44,15 @@ export function initFlatMenu(a: any) {
     );
   }, []);
 }
+// 3. Tambah fungsi di menu.helper.ts
+export function filterMenuByRole(menus: any[], privileges: any) {
+  if (!privileges || Object.keys(privileges).length === 0) {
+    return menus; // Jika tidak ada privileges, return semua menu
+  }
+  
+  return menus.filter(menu => {
+    // Check berdasarkan menu.name vs privileges
+    const menuPrivileges = privileges[menu.name] || [];
+    return menuPrivileges.includes('view');
+  });
+}

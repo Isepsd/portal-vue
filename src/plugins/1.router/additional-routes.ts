@@ -11,15 +11,9 @@ export const redirects: RouteRecordRaw[] = [
     name: 'index',
     redirect: to => {
       // TODO: Get type from backend
-      const userData = useCookie<Record<string, unknown> | null | undefined>('userData')
-      const userRole = userData.value?.role
 
-      if (userRole === 'admin')
-        return { name: 'dashboards-kinerjascada' }
-      if (userRole === 'client')
-        return { name: 'access-control' }
 
-      return { name: 'login', query: to.query }
+   return { name: 'dashboard-dashfasop-kinerjascada', query: to.query }
     },
   },
   {
@@ -72,5 +66,210 @@ export const routes: RouteRecordRaw[] = [
     path: '/apps/ecommerce/dashboard',
     name: 'apps-ecommerce-dashboard',
     component: () => import('@/pages/dashboards/ecommerce.vue'),
+  },
+  {
+    path: '/notfound/notfound',
+    name: 'notfound-notfound',
+    component: () => import('@/pages/notfound/notfound.vue'),
+  },
+
+   // ✅ Tambahan route untuk menu administrator → roles menu
+//   {
+//   path: '/administrator/rolesettings',
+//   name: 'administrator-rolesettings',
+//   component: () => import('@/pages/administrator/rolesettings.vue'),
+//   meta: {
+//     requiresAuth: true,
+//     navActiveLink: 'administrator-rolesettings',
+//   },
+// },
+//  {
+//     path: '/dashboards/kinerjascada',
+//     name: 'dashboards-kinerjascada',
+//     component: () => import('@/pages/dashboards/kinerjascada.vue'),
+//     meta: {
+//       requiresAuth: true,
+//       navActiveLink: 'dashboard',
+//     },
+//   },
+
+
+  // {
+  //   path: '/administrator/roles',
+  //   name: 'administrator-roles', 
+  //   component: () => import('@/pages/administrator/roles.vue'),
+  //   // meta: {
+  //   //   requiresAuth: true,
+  //   //   navActiveLink: 'settings',
+  //   // },
+  // },
+
+  // ✅ Route untuk Kinerja Scada Dashboard
+  // {
+  //   path: '/dashboards/dashfasop/kinerjascada',
+  //   name: 'dashboards-dashfasop-kinerjascada',
+  //   component: () => import('@/pages/dashboards/dashfasop/kinerjascada.vue'),
+  //   // meta: {
+  //   //   requiresAuth: true,
+  //   //   navActiveLink: 'dashboards-dashfasop-kinerjascada',
+  //   },
+  // },
+
+  // ✅ Routes untuk Pembangkit Form
+  {
+    path: '/jaringan/pembangkit/tambah',
+    name: 'jaringan-pembangkit-tambah',
+    component: () => import('@/pages/jaringan/component/form/FormPembangkit/pembangkit-form-page.vue'),
+    
+  },
+  {
+    path: '/jaringan/pembangkit/edit/:id',
+    name: 'jaringan-pembangkit-edit',
+    component: () => import('@/pages/jaringan/component/form/FormPembangkit/pembangkit-form-page.vue'),
+   
+  },
+  {
+    path: '/jaringan/unitpembangkit/tambah',
+    name: 'jaringan-unitpembangkit-tambah',
+    component: () => import('@/pages/jaringan/component/form/FormUnitPembangkit/unit-pembangkit-form-page.vue'),
+    
+  },
+  {
+    path: '/jaringan/unitpembangkit/edit/:id',
+    name: 'jaringan-unitpembangkit-edit',
+    component: () => import('@/pages/jaringan/component/form/FormUnitPembangkit/unit-pembangkit-form-page.vue'),
+   
+  },
+  {
+    path: '/jaringan/jenispembangkit/tambah',
+    name: 'jaringan-jenispembangkit-tambah',
+    component: () => import('@/pages/jaringan/component/form/FormJenisPembangkit/jenis-pembangkit-form-page.vue'),
+    
+  },
+  {
+    path: '/jaringan/jenispembangkit/edit/:id',
+    name: 'jaringan-jenispembangkit-edit',
+    component: () => import('@/pages/jaringan/component/form/FormJenisPembangkit/jenis-pembangkit-form-page.vue'),
+   
+  },
+  {
+    path: '/masteropsisdis/kelompokgangguan/tambah',
+    name: 'masteropsisdis-kelompokgangguan-tambah',
+    component: () => import('@/pages/masteropsisdis/component/form/FormKelompokGangguan/kelompok-gangguan-form-page.vue'),
+    
+  },
+  {
+    path: '/masteropsisdis/kelompokgangguan/edit/:id',
+    name: 'masteropsisdis-kelompokgangguan-edit',
+    component: () => import('@/pages/masteropsisdis/component/form/FormKelompokGangguan/kelompok-gangguan-form-page.vue'),
+   
+  },
+  {
+    path: '/masteropsisdis/dampakkerusakan/tambah',
+    name: 'masteropsisdis-dampakkerusakan-tambah',
+    component: () => import('@/pages/masteropsisdis/component/form/Formdampakkerusakan/dampak-kerusakan-form-page.vue'),
+    
+  },
+  {
+    path: '/masteropsisdis/dampakkerusakan/edit/:id',
+    name: 'masteropsisdis-dampakkerusakan-edit',
+    component: () => import('@/pages/masteropsisdis/component/form/Formdampakkerusakan/dampak-kerusakan-form-page.vue'),
+   
+  },
+  {
+    path: '/masteropsisdis/equipment/tambah',
+    name: 'masteropsisdis-equipment-tambah',
+    component: () => import('@/pages/masteropsisdis/component/form/Formequipment/equipment-form-page.vue'),
+    
+  },
+  {
+    path: '/masteropsisdis/equipment/edit/:id',
+    name: 'masteropsisdis-equipment-edit',
+    component: () => import('@/pages/masteropsisdis/component/form/Formequipment/equipment-form-page.vue'),
+   
+  },
+  {
+    path: '/masteropsisdis/subfasilitas/tambah',
+    name: 'masteropsisdis-subfasilitas-tambah',
+    component: () => import('@/pages/masteropsisdis/component/form/Formsubfasilitas/subfasilitas-form-page.vue'),
+    
+  },
+  {
+    path: '/masteropsisdis/subfasilitas/edit/:id',
+    name: 'masteropsisdis-subfasilitas-edit',
+    component: () => import('@/pages/masteropsisdis/component/form/Formsubfasilitas/subfasilitas-form-page.vue'),
+   
+  },
+  {
+    path: '/masteropsisdis/fasilitas/tambah',
+    name: 'masteropsisdis-fasilitas-tambah',
+    component: () => import('@/pages/masteropsisdis/component/form/Formfasilitas/fasilitas-form-page.vue'),
+    
+  },
+  {
+    path: '/masteropsisdis/fasilitas/edit/:id',
+    name: 'masteropsisdis-fasilitas-edit',
+    component: () => import('@/pages/masteropsisdis/component/form/Formfasilitas/fasilitas-form-page.vue'),
+   
+  },
+  {
+    path: '/masteropsisdis/penyebabgangguan/tambah',
+    name: 'masteropsisdis-penyebabgangguan-tambah',
+    component: () => import('@/pages/masteropsisdis/component/form/Formpenyebabgangguan/penyebabgangguan-form-page.vue'),
+    
+  },
+  {
+    path: '/masteropsisdis/penyebabgangguan/edit/:id',
+    name: 'masteropsisdis-penyebabgangguan-edit',
+    component: () => import('@/pages/masteropsisdis/component/form/Formpenyebabgangguan/penyebabgangguan-form-page.vue'),
+   
+  },
+  {
+    path: '/masteropsisdis/cuaca/tambah',
+    name: 'masteropsisdis-cuaca-tambah',
+    component: () => import('@/pages/masteropsisdis/component/form/Formcuaca/cuaca-form-page.vue'),
+    
+  },
+  {
+    path: '/masteropsisdis/cuaca/edit/:id',
+    name: 'masteropsisdis-cuaca-edit',
+    component: () => import('@/pages/masteropsisdis/component/form/Formcuaca/cuaca-form-page.vue'),
+   
+  },
+  {
+    path: '/masteropsisdis/indikasi/tambah',
+    name: 'masteropsisdis-indikasi-tambah',
+    component: () => import('@/pages/masteropsisdis/component/form/Formindikasi/indikasi-form-page.vue'),
+    
+  },
+  {
+    path: '/masteropsisdis/indikasi/edit/:id',
+    name: 'masteropsisdis-indikasi-edit',
+    component: () => import('@/pages/masteropsisdis/component/form/Formindikasi/indikasi-form-page.vue'),
+   
+  },
+  {
+    path: '/masteropsisdis/dispatcher/tambah',
+    name: 'masteropsisdis-dispatcher-tambah',
+    component: () => import('@/pages/masteropsisdis/component/form/Formdispatcher/dispatcher-form-page.vue'),
+    
+  },
+  {
+    path: '/masteropsisdis/dispatcher/edit/:id',
+    name: 'masteropsisdis-dispatcher-edit',
+    component: () => import('@/pages/masteropsisdis/component/form/Formdispatcher/dispatcher-form-page.vue'),
+   
+  },
+  {
+    path: '/jaringan/garduinduk/tambah',
+    name: 'jaringan-garduinduk-tambah',
+    component: () => import('@/pages/jaringan/component/form/Formgarduinduk/gardu-induk-form-page.vue'),
+    
+  },
+  {
+    path: '/jaringan/garduinduk/edit/:id',
+    name: 'jaringan-garduinduk-edit',
+    component: () => import('@/pages/jaringan/component/form/Formgarduinduk/gardu-induk-form-page.vue'),
+   
   },
 ]

@@ -1,8 +1,7 @@
+import { useNavigationStore } from '@/pages/stores/navigation'
 import { AppContentLayoutNav, NavbarType } from '@layouts/enums'
 import { injectionKeyIsVerticalNavHovered } from '@layouts/symbols'
 import { _setDirAttr } from '@layouts/utils'
-
-// ℹ️ We should not import themeConfig here but in urgency we are doing it for now
 import { layoutConfig } from '@themeConfig'
 
 export const namespaceConfig = (str: string) => `${layoutConfig.app.title}-${str}`
@@ -13,6 +12,7 @@ export const cookieRef = <T>(key: string, defaultValue: T) => {
 
 export const useLayoutConfigStore = defineStore('layoutConfig', () => {
   const route = useRoute()
+  const navigationStore = useNavigationStore()
 
   // 👉 Navbar Type
   const navbarType = ref(layoutConfig.navbar.type)
@@ -42,7 +42,7 @@ export const useLayoutConfigStore = defineStore('layoutConfig', () => {
   // 👉 Horizontal Nav Type
   const horizontalNavType = ref(layoutConfig.horizontalNav.type)
 
-  //  👉 Horizontal Nav Popover Offset
+  // 👉 Horizontal Nav Popover Offset
   const horizontalNavPopoverOffset = ref(layoutConfig.horizontalNav.popoverOffset)
 
   // 👉 Footer Type
@@ -114,6 +114,22 @@ export const useLayoutConfigStore = defineStore('layoutConfig', () => {
     return computed(() => isVerticalNavCollapsed.value && !isVerticalNavHoveredLocal.value && !isLessThanOverlayNavBreakpoint.value)
   }
 
+  // 🔹 Enhanced guards for navigation state
+  const isLoading = computed(() => navigationStore.isLoading)
+
+  const isInitialized = computed(() => navigationStore.isInitialized)
+
+  const hasNavigationData = computed(() => navigationStore.verticalNav && navigationStore.verticalNav.length > 0)
+
+  // 🔹 Reset function for testing
+  const $reset = () => {
+    console.log('🔄 Resetting layout config store')
+    navigationStore.clearNavigation()
+    isVerticalNavCollapsed.value = layoutConfig.verticalNav.isVerticalNavCollapsed
+    appContentLayoutNav.value = layoutConfig.app.contentLayoutNav
+    navbarType.value = layoutConfig.navbar.type
+  }
+
   return {
     appContentWidth,
     appContentLayoutNav,
@@ -127,5 +143,10 @@ export const useLayoutConfigStore = defineStore('layoutConfig', () => {
     isAppRTL,
     _layoutClasses,
     isVerticalNavMini,
+    // 🔹 Enhanced state for navigation
+    isLoading,
+    isInitialized,
+    hasNavigationData,
+    $reset,
   }
 })
