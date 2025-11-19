@@ -215,6 +215,7 @@ const columnDefs = computed(() => {
     headerName: 'No',
     field: 'number',
     width: 80,
+    pinned: "left",
     filter: false,
     sortable: false,
   })
@@ -225,6 +226,7 @@ const columnDefs = computed(() => {
     headerName: 'Aksi',
     field: 'action',
     width: 160,
+    pinned: "left",
     filter: false,
     sortable: false,
     suppressHtmlEscape: true,
@@ -482,14 +484,14 @@ const handleRefresh = async () => {
   border: 1px solid #ddd;
   border-radius: 8px;
   overflow: hidden; /* supaya grid dan toolbar menyatu tanpa jarak */
-  background-color: #fff;
+
 }
 
 /* Toolbar */
 .table-toolbar {
   padding: 8px 12px;
   border-bottom: 1px solid #ddd; /* garis pemisah halus */
-  background-color: #f9f9f9;
+
 }
 
 /* Tombol kecil */
@@ -510,7 +512,7 @@ const handleRefresh = async () => {
 
 .btn-outline-secondary {
   border: 1px solid #ccc;
-  color: #555;
+
   background: transparent;
 }
 

@@ -2,53 +2,45 @@
 import { ROLE_ACCESS, ROLE_ACTION } from '@/components/helper/auth.helper'
 import { API_PATH } from '@/composables/_path.service'
 import { getAllByPath } from '@/composables/main.service'
-import { createAgGridTheme, getGlobalAgGridTheme, setGlobalAgGridTheme } from '@core/index'
-import { useConfigStore } from '@core/stores/config'
-import { ModuleRegistry } from 'ag-grid-community'
-import {
-  ClientSideRowModelModule,
-  ExcelExportModule,
-  MenuModule,
-  NumberFilterModule,
-  RowGroupingModule,
-  TextFilterModule,
-  TreeDataModule
-} from 'ag-grid-enterprise'
-import { AgGridVue } from 'ag-grid-vue3'
 import axios from 'axios'
-import { onMounted, reactive, ref, watch } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import { VAvatar, VBtn, VCard, VCardText, VCardTitle, VCol, VDivider, VIcon, VRow, VTab, VTabs, VTabsWindow, VTabsWindowItem } from 'vuetify/components'
 import TableIgrid from '../component/TableIgrid.vue'
 import type { FilterValues } from '../component/types'
 
-// Register AG Grid modules
-ModuleRegistry.registerModules([
-  ClientSideRowModelModule,
-  MenuModule,
-  TextFilterModule,
-  NumberFilterModule,
-  TreeDataModule,
-  RowGroupingModule,
-  ExcelExportModule,
-])
-
-
-// AG Grid references
-const treeGridRef = ref()
-const gridTheme = getGlobalAgGridTheme()
-const configStore = useConfigStore()
-const gridThemeRef = ref(gridTheme)
-
-// Track selected node
+// Track expanded nodes
+const expandedNodes = ref<Set<string>>(new Set())
 const selectedNodeId = ref<string>('')
-const selectedNodeData = ref<any>(null)
+const allExpanded = ref<boolean>(false)
 
-// Add type declarations for window
-declare global {
-  interface Window {
-    gridApi: any
-    gridColumnApi: any
+const toggleExpand = (itemId: string) => {
+  if (expandedNodes.value.has(itemId)) {
+    expandedNodes.value.delete(itemId)
+  } else {
+    expandedNodes.value.add(itemId)
   }
+}
+
+const toggleAllExpand = () => {
+  allExpanded.value = !allExpanded.value
+  if (allExpanded.value) {
+    // Expand all nodes
+    treeData.value.forEach(item => {
+      expandedNodes.value.add(item.id)
+    })
+  } else {
+    // Collapse all nodes
+    expandedNodes.value.clear()
+  }
+}
+
+const isExpanded = (itemId: string) => {
+  return expandedNodes.value.has(itemId)
+}
+
+const selectNode = (node: TreeItem) => {
+  selectedNodeId.value = node.id
+  onTreeRowClicked({ data: node })
 }
 
 // State management
@@ -73,71 +65,16 @@ const validFilterValues = ref<FilterValues>({
   kesimpulan: 'VALID',
 })
 
-// Handle tree row selection
-const onTreeRowClicked = (event: any) => {
-  const selected = event.data
-  if (selected) {
-    let rowParams: any = {}
-
-    if (selected.children && selected.children.length > 0) {
-      // Jika ini adalah parent
-      rowParams = {
-        nama_induk_pointtype: selected.nama_pointtype,
-        nama_pointtype: null,
-      }
-    } else {
-      // Jika ini adalah child
-      const parentPointType = selected.parentPointType
-      rowParams = {
-        nama_induk_pointtype: parentPointType,
-        nama_pointtype: selected.nama_pointtype,
-      }
-    }
-
-    rowSelected.value = rowParams
-    
-    // Update filter values for detail tables
-    invalidFilterValues.value.nama_induk_pointtype = rowParams.nama_induk_pointtype
-    invalidFilterValues.value.nama_pointtype = rowParams.nama_pointtype
-    validFilterValues.value.nama_induk_pointtype = rowParams.nama_induk_pointtype
-    validFilterValues.value.nama_pointtype = rowParams.nama_pointtype
-  }
-}
-
-// Grid ready handler
-const onGridReady = (params: any) => {
-  const gridApi = params.api
-  const gridColumnApi = params.columnApi
-  
-  // Store grid APIs in window for debugging
-  window.gridApi = gridApi
-  window.gridColumnApi = gridColumnApi
-  
-  // Auto-size columns after data is loaded
-  setTimeout(() => {
-    gridApi.autoSizeAllColumns(false)
-  }, 500)
-  
-  console.log('✅ AG Grid is ready')
-}
-
-// AG Grid configuration
-const defaultColDef = ref({
-  sortable: true,
-  resizable: true,
-  filter: 'agTextColumnFilter',
-  floatingFilter: false,
-  suppressMenu: false,
-  flex: 1,
-})
-
-// Function to get the path for tree data
-const getDataPath = (data: any) => {
-  return data.path || []
-}
-
-// Tree column definitions - Point Type akan dihandle oleh autoGroupColumnDef
+// Tree column definitions
 const treeColumns = [
+  {
+    headerName: 'Nama Point',
+    field: 'nama_pointtype',
+    width: 300,
+    sortable: true,
+    filter: 'agTextColumnFilter',
+    cellRenderer: 'agGroupCellRenderer',
+  },
   {
     headerName: 'Jumlah Point',
     field: 'jumlah_point',
@@ -150,41 +87,23 @@ const treeColumns = [
     field: 'jumlah_normal',
     width: 120,
     sortable: true,
+    filter: 'agNumberColumnFilter',
   },
   {
     headerName: 'Jumlah Gangguan',
     field: 'jumlah_ggn',
     width: 120,
     sortable: true,
+    filter: 'agNumberColumnFilter',
   },
   {
     headerName: 'Avability',
     field: 'avability',
     width: 120,
     sortable: true,
-    valueFormatter: (p:any) => `${p.value ?? 0}%`,
+    filter: 'agTextColumnFilter',
   },
 ]
-
-// Grid options untuk tree data
-const gridOptions:any = ref({
-  treeData: true,
-  getDataPath: getDataPath,
-  groupDefaultExpanded: 0, // Keep all groups collapsed by default
-  autoGroupColumnDef: {
-    headerName: 'Point Type',
-     field: 'nama_pointtype',
-    cellRenderer: 'agGroupCellRenderer',
-    cellRendererParams: {
-      suppressCount: true,
-      showLeafGroup: true,
-    },
-    sortable: true,
-    filter: 'agTextColumnFilter',
-    width: 250,
-  },
-})
-
 
 // Detail column definitions
 const detailColumns = [
@@ -284,6 +203,7 @@ const roleActions = reactive({
   delete: true,
 })
 
+
 // Tree data remapping function
 interface TreeItem {
   id: string
@@ -297,45 +217,58 @@ interface TreeItem {
   path: string[]
 }
 
-const remappedTreeJaringanData = (tree: any[]): TreeItem[] => {
-  const allNodes: TreeItem[] = []
+
+const remappedTreeJaringanData = (tree: any[], parent: any = null, level = 0): TreeItem[] => {
+  if (!tree || !Array.isArray(tree)) return []
   
-  const processNode = (item: any, currentPath: string[]) => {
-    const nodePath = [...currentPath, item.nama_pointtype]
-    
-    const treeNode: TreeItem = {
-      id: item.id_pointtype,
+  return tree.map((item: any, index: number): TreeItem => {
+    const uniqueId = item.id_pointtype || `${parent?.nama_pointtype || 'root'}_${item.nama_pointtype}_${index}`
+    return {
+      id: uniqueId,
       nama_pointtype: item.nama_pointtype,
-      jumlah_point: item.jumlah_point || 0,
-      jumlah_normal: item.jumlah_normal || 0,
-      jumlah_ggn: item.jumlah_ggn || 0,
-      avability: item.avability || 0,
-      parentPointType: currentPath.length ? currentPath[currentPath.length - 1] : null,
-      path: nodePath,
-      children: item.children || []
+      jumlah_point: item.jumlah_point,
+      jumlah_normal: item.jumlah_normal,
+      jumlah_ggn: item.jumlah_ggn,
+      avability: item.avability,
+      parentPointType: parent?.nama_pointtype || null,
+      children: remappedTreeJaringanData(item.children, item, level + 1),
+      path: parent ? [...(parent.path || []), item.nama_pointtype] : [item.nama_pointtype],
     }
-    
-    allNodes.push(treeNode)
-    
-    // Process children if they exist
-    if (item.children && Array.isArray(item.children) && item.children.length > 0) {
-      item.children.forEach((child: any) => {
-        processNode(child, nodePath)
-      })
-    }
-  }
-  
-  // Process all root items
-  tree.forEach((item: any) => {
-    processNode(item, [])
   })
-  
-  return allNodes
 }
 
 
-const source = axios.CancelToken.source()
+// Handle tree row selection
+const onTreeRowClicked = (event: any) => {
+  const selected = event.data
+  if (selected) {
+    let rowParams: any = {}
 
+    if (selected.children && selected.children.length > 0) {
+      // Jika ini adalah parent
+      rowParams = {
+        nama_induk_pointtype: selected.nama_pointtype,
+        nama_pointtype: null,
+      }
+    } else {
+      // Jika ini adalah child
+      const parentPointType = selected.parentPointType
+      rowParams = {
+        nama_induk_pointtype: parentPointType,
+        nama_pointtype: selected.nama_pointtype,
+      }
+    }
+
+    rowSelected.value = rowParams
+    
+    // Update filter values for detail tables
+    invalidFilterValues.value.nama_induk_pointtype = rowParams.nama_induk_pointtype
+    invalidFilterValues.value.nama_pointtype = rowParams.nama_pointtype
+    validFilterValues.value.nama_induk_pointtype = rowParams.nama_induk_pointtype
+    validFilterValues.value.nama_pointtype = rowParams.nama_pointtype
+  }
+}
+const source = axios.CancelToken.source()
 // Load tree data
 const loadTreeData = async () => {
   try {
@@ -392,6 +325,7 @@ const handleRespDataApi = (data: any[], page: number, limit: number) => {
   })
 }
 
+
 // Export functionality
 const exportToExcel = (data: any[], filename: string) => {
   // Create a simple CSV export
@@ -415,21 +349,12 @@ const exportTreeData = () => {
   exportToExcel(treeData.value, 'Gangguan_Peralatan_Scada_Tree.csv')
 }
 
-// Watch for theme changes
-watch(
-  () => configStore.theme,
-  themeMode => {
-    const newAgTheme = createAgGridTheme(themeMode as 'light' | 'dark' | 'system')
-    setGlobalAgGridTheme(newAgTheme)
-    gridThemeRef.value = newAgTheme
-    document.documentElement.style.setProperty('--ag-active-theme', themeMode)
-  },
-  { immediate: true },
-)
-
 // Lifecycle hooks
 onMounted(() => {
   const roleAccess: any = ROLE_ACCESS('gangguan-scada')
+  if (!roleAccess || !Array.isArray(roleAccess) || roleAccess.length === 0) {
+    return
+  }
   const roleAct = {
     view: ROLE_ACTION(roleAccess, 'view'),
     create: ROLE_ACTION(roleAccess, 'create'),
@@ -438,25 +363,11 @@ onMounted(() => {
   }
 
   Object.assign(roleActions, roleAct)
-  loadTreeData()
+
+
 })
-
-
-// Also add a watcher to ensure data loads when treeData is empty
-watch(
-  () => treeData.value.length,
-  (newLength, oldLength) => {
-    if (newLength === 0 && oldLength === 0) {
-      console.log('🔄 Tree data is empty, attempting to reload...')
-      // Use setTimeout to avoid infinite loops
-      setTimeout(() => {
-        if (treeData.value.length === 0) {
-          loadTreeData()
-        }
-      }, 1000)
-    }
-  }
-)
+  // Load initial tree data
+  loadTreeData()
 </script>
 
 <template>
@@ -507,26 +418,98 @@ watch(
       </VCardTitle>
       <VDivider />
       <VCardText class="pa-0">
-        <div v-if="treeData.length === 0" class="text-center py-8">
-          <VIcon icon="tabler-loader-2" size="48" class="text-disabled mb-4" />
-          <p class="text-body-2 text-disabled">Loading tree data...</p>
+        <div class="tree-container" style="height: 400px; overflow-y: auto; padding: 1rem;">
+          <div v-if="treeData.length === 0" class="text-center py-8">
+            <VIcon icon="tabler-loader-2" size="48" class="text-disabled mb-4" />
+            <p class="text-body-2 text-disabled">Loading tree data...</p>
+          </div>
+          
+          <div v-else class="tree-table">
+            <!-- Table Header -->
+            <div class="tree-header" style="display: flex; background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%); color: white; font-weight: 600; border-radius: 8px 8px 0 0;">
+             
+              <div class="tree-col-name" style="padding: 12px; flex: 1; display: flex; align-items: center;">
+                <VIcon 
+                  :icon="allExpanded ? 'tabler-chevron-down' : 'tabler-chevron-right'" 
+                  size="16" 
+                  @click="toggleAllExpand"
+                  style="cursor: pointer; margin-right: 8px;"
+                />
+                Nama Point
+              </div>
+              <div class="tree-col-jumlah" style="padding: 12px; min-width: 120px; text-align: center;">Jumlah Point</div>
+              <div class="tree-col-normal" style="padding: 12px; min-width: 120px; text-align: center;">Jumlah Normal</div>
+              <div class="tree-col-gangguan" style="padding: 12px; min-width: 120px; text-align: center;">Jumlah Gangguan</div>
+              <div class="tree-col-avability" style="padding: 12px; min-width: 120px; text-align: center;">Availability</div>
+            </div>
+            
+            <!-- Tree Rows -->
+            <div class="tree-body">
+              <template v-for="item in treeData" :key="item.id">
+                <!-- Parent Row -->
+                <div 
+                  class="tree-row"
+                  :class="{ 'tree-row-selected': selectedNodeId === item.id }"
+                  @click="selectNode(item)"
+                  style="display: flex; border-bottom: 1px solid #e0e0e0; cursor: pointer; transition: all 0.3s ease;"
+                  :style="{ paddingLeft: '0px' }"
+                >
+                  <div class="tree-col-select" style="padding: 12px; min-width: 60px; display: flex; align-items: center;">
+                    <!-- <VRadioGroup v-model="selectedNodeId" hide-details>
+                      <VRadio :value="item.id" @click.stop />
+                    </VRadioGroup> -->
+                  </div>
+                  <div class="tree-col-name" style="padding: 12px; flex: 1; display: flex; align-items: center;">
+                    <VIcon 
+                      v-if="item.children && item.children.length > 0" 
+                      :icon="isExpanded(item.id) ? 'tabler-chevron-down' : 'tabler-chevron-right'" 
+                      size="16" 
+                      @click.stop="toggleExpand(item.id)"
+                      style="cursor: pointer; margin-right: 8px; color: #666;"
+                    />
+                    <span v-else style="width: 24px; display: inline-block;"></span>
+                    <VIcon icon="tabler-alert-triangle" size="16" style="color: #ffa726; margin-right: 8px;" />
+                    <span style="font-weight: 500;">{{ item.nama_pointtype }}</span>
+                    <span v-if="item.children && item.children.length > 0" class="text-disabled" style="margin-left: 8px; font-size: 0.8em; color: #666;">({{ item.children.length }})</span>
+                  </div>
+                  <div class="tree-col-jumlah" style="padding: 12px; min-width: 120px; text-align: center;">{{ item.jumlah_point }}</div>
+                  <div class="tree-col-normal" style="padding: 12px; min-width: 120px; text-align: center;">{{ item.jumlah_normal }}</div>
+                  <div class="tree-col-gangguan" style="padding: 12px; min-width: 120px; text-align: center;">{{ item.jumlah_ggn }}</div>
+                  <div class="tree-col-avability" style="padding: 12px; min-width: 120px; text-align: center;">{{ item.avability }}%</div>
+                </div>
+                
+                <!-- Child Rows -->
+                <template v-if="isExpanded(item.id) && item.children && item.children.length > 0">
+                  <div 
+                    v-for="child in item.children" 
+                    :key="child.id"
+                    class="tree-row tree-child-row"
+                    :class="{ 'tree-row-selected': selectedNodeId === child.id }"
+                    @click="selectNode(child)"
+                    style="display: flex; border-bottom: 1px solid #e0e0e0; cursor: pointer; transition: all 0.3s ease; background: #f8f9fa;"
+                    :style="{ paddingLeft: '0px' }"
+                  >
+                    <div class="tree-col-select" style="padding: 12px; min-width: 60px; display: flex; align-items: center;">
+                      <!-- <VRadioGroup v-model="selectedNodeId" hide-details>
+                        <VRadio :value="child.id" @click.stop />
+                      </VRadioGroup> -->
+                    </div>
+                    <div class="tree-col-name" style="padding: 12px; flex: 1; display: flex; align-items: center;">
+                      <span style="width: 24px; display: inline-block;"></span>
+                      <span style="width: 24px; display: inline-block;"></span>
+                      <VIcon icon="tabler-alert-triangle" size="16" style="color: #ffa726; margin-right: 8px;" />
+                      <span style="font-weight: 500;">{{ child.nama_pointtype }}</span>
+                    </div>
+                    <div class="tree-col-jumlah" style="padding: 12px; min-width: 120px; text-align: center;">{{ child.jumlah_point }}</div>
+                    <div class="tree-col-normal" style="padding: 12px; min-width: 120px; text-align: center;">{{ child.jumlah_normal }}</div>
+                    <div class="tree-col-gangguan" style="padding: 12px; min-width: 120px; text-align: center;">{{ child.jumlah_ggn }}</div>
+                    <div class="tree-col-avability" style="padding: 12px; min-width: 120px; text-align: center;">{{ child.avability }}%</div>
+                  </div>
+                </template>
+              </template>
+            </div>
+          </div>
         </div>
-        
-    <AgGridVue
-  v-else
-  ref="treeGridRef"
-  style="height: 400px; width: 100%;"
-  :theme="gridThemeRef"
-  :columnDefs="treeColumns"
-  :rowData="treeData"
-  :defaultColDef="defaultColDef"
-  :gridOptions="gridOptions"
-  :sideBar="false"
-  @grid-ready="onGridReady"
-  @row-clicked="onTreeRowClicked"
-/>
-
-
       </VCardText>
     </VCard>
 
@@ -594,84 +577,10 @@ watch(
   </div>
 </template>
 
-<style>
-/* AG Grid Tree Styles - Non-scoped untuk global AG Grid components */
+<style scoped>
 .monitoring-gangguan-scada {
   padding: 1rem;
 }
-
-/* Tree expand/collapse icons */
-.ag-theme-alpine .ag-row-group {
-  cursor: pointer;
-}
-
-.ag-theme-alpine .ag-row-group-leaf {
-  font-weight: normal;
-}
-
-.ag-theme-alpine .ag-row-group-indent-1 {
-  padding-left: 20px;
-}
-
-.ag-theme-alpine .ag-row-group-indent-2 {
-  padding-left: 40px;
-}
-
-.ag-theme-alpine .ag-row-group-indent-3 {
-  padding-left: 60px;
-}
-
-.ag-theme-alpine .ag-row-group-indent-4 {
-  padding-left: 80px;
-}
-
-/* Tree icon styling */
-.ag-theme-alpine .ag-icon-tree-open,
-.ag-theme-alpine .ag-icon-tree-closed,
-.ag-theme-alpine .ag-icon-group-expanded,
-.ag-theme-alpine .ag-icon-group-contracted {
-  color: #1976d2 !important;
-  cursor: pointer !important;
-  transition: transform 0.2s ease;
-}
-
-.ag-theme-alpine .ag-icon-tree-open:hover,
-.ag-theme-alpine .ag-icon-tree-closed:hover,
-.ag-theme-alpine .ag-icon-group-expanded:hover,
-.ag-theme-alpine .ag-icon-group-contracted:hover {
-  color: #1565c0 !important;
-  transform: scale(1.1);
-}
-
-/* Group cell renderer styles */
-.ag-theme-alpine .ag-group-cell-value {
-  display: flex;
-  align-items: center;
-  font-weight: 500;
-}
-
-.ag-theme-alpine .ag-group-child-count {
-  background-color: #e3f2fd;
-  color: #1976d2;
-  border-radius: 12px;
-  padding: 2px 8px;
-  font-size: 0.75rem;
-  margin-left: 8px;
-  font-weight: normal;
-}
-
-/* Tree line styling */
-.ag-theme-alpine .ag-row-group-leaf .ag-group-cell-value {
-  opacity: 0.8;
-}
-
-/* Ensure proper spacing for tree hierarchy */
-.ag-theme-alpine .ag-cell-value {
-  padding: 4px 8px;
-}
-</style>
-
-<style scoped>
 
 /* Tree Table Styles */
 .tree-table {
@@ -680,6 +589,15 @@ watch(
   overflow: hidden;
 }
 
+.tree-header {
+  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+  color: white;
+  font-weight: 600;
+  border-radius: 8px 8px 0 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
 
 .tree-row {
   transition: all 0.3s ease;
@@ -692,7 +610,11 @@ watch(
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-
+.tree-row-selected {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  border-left: 4px solid #1976d2;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.2);
+}
 
 .tree-child-row {
   background: #f8f9fa;
@@ -752,7 +674,10 @@ watch(
 }
 
 /* Custom styles for better readability */
-
+.v-card-title {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 8px 8px 0 0;
+}
 
 .v-tab {
   text-transform: none;

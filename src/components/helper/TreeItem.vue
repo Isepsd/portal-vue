@@ -47,31 +47,44 @@
       </div>
 
       <!-- Action Buttons -->
-      <div class="actions">
-        <VBtn
-          @click.stop="$emit('edit', item)"
-          icon
-          size="small"
-          variant="text"
-          color="primary"
-          class="action-btn"
-        >
-          <VIcon icon="mdi-pencil" size="16" />
-          <VTooltip activator="parent" location="top">Edit Menu</VTooltip>
-        </VBtn>
-        
-        <VBtn
-          @click.stop="$emit('delete', item)"
-          icon
-          size="small"
-          variant="text"
-          color="error"
-          class="action-btn"
-        >
-          <VIcon icon="mdi-delete" size="16" />
-          <VTooltip activator="parent" location="top">Hapus Menu</VTooltip>
-        </VBtn>
-      </div>
+     <div class="actions">
+
+          <!-- EDIT -->
+          <VTooltip location="top">
+            <template #activator="{ props }">
+              <VBtn
+                v-bind="props"
+                @click.stop="$emit('edit', item)"
+                size="small"
+                variant="tonal"
+                color="primary"
+                icon
+              >
+              <i class="fa fa-pencil action-icon"></i>
+              </VBtn>
+            </template>
+            Edit Menu
+          </VTooltip>
+
+          <!-- DELETE -->
+          <VTooltip location="top">
+            <template #activator="{ props }">
+              <VBtn
+                v-bind="props"
+                @click.stop="$emit('delete', item)"
+                size="small"
+                variant="tonal"
+                color="error"
+                icon
+              >
+              <i class="fa fa-trash action-icon"></i>
+              </VBtn>
+            </template>
+            Hapus Menu
+          </VTooltip>
+
+        </div>
+
     </div>
 
     <!-- Children Container -->
@@ -153,27 +166,33 @@ const getPrivilegeBadgeColor = (priv: string) => {
   align-items: center;
   cursor: pointer;
   padding: 12px 16px;
-  background: #ffffff;
-  border: 1px solid #e0e0e0;
+
+
   border-radius: 8px;
   font-size: 14px;
-  color: #333;
+
   transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
 }
 
 .tree-row:hover {
-  background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
+
   border-color: #1976d2;
   transform: translateX(2px);
   box-shadow: 0 2px 8px rgba(25, 118, 210, 0.15);
 }
 
 .tree-row--expanded {
-  background: linear-gradient(135deg, #e3f2fd 0%, #f3f4ff 100%);
+
   border-color: #1976d2;
 }
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 
 .tree-row--has-children {
   font-weight: 500;
@@ -202,17 +221,12 @@ const getPrivilegeBadgeColor = (priv: string) => {
 
 .menu-title {
   font-weight: 500;
-  color: #333;
+  /* color: #333; */
 }
 
-.menu-path {
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
 
-.tree-row:hover .menu-path {
-  opacity: 1;
-}
+
+
 
 .menu-badges {
   display: flex;
@@ -220,27 +234,6 @@ const getPrivilegeBadgeColor = (priv: string) => {
   gap: 2px;
 }
 
-.actions {
-  display: flex;
-  gap: 4px;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.tree-row:hover .actions {
-  opacity: 1;
-}
-
-.action-btn {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-}
-
-.action-btn:hover {
-  transform: scale(1.1);
-}
 
 .tree-children {
   margin-left: 24px;
@@ -257,7 +250,7 @@ const getPrivilegeBadgeColor = (priv: string) => {
   top: 0;
   bottom: 0;
   width: 2px;
-  background: linear-gradient(180deg, #1976d2 0%, transparent 100%);
+
   opacity: 0.3;
 }
 
@@ -285,13 +278,6 @@ const getPrivilegeBadgeColor = (priv: string) => {
 }
 
 /* Depth-based styling */
-.tree-item:nth-child(1) .tree-row {
-  background: linear-gradient(135deg, #ffffff 0%, #fafbff 100%);
-}
-
-.tree-item:nth-child(even) .tree-row {
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
-}
 
 /* Focus states */
 .tree-row:focus-visible {
