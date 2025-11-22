@@ -1,12 +1,18 @@
 <script setup lang="ts">
 import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
-import misc404 from '@images/pages/404.png'
+import misc404 from '@images/pages/404nw.png'
 import miscMaskDark from '@images/pages/misc-mask-dark.png'
 import miscMaskLight from '@images/pages/misc-mask-light.png'
 
 const authThemeMask = useGenerateImageVariant(miscMaskLight, miscMaskDark)
 
-
+definePage({
+  alias: '/pages/misc/not-found/:error(.*)',
+  meta: {
+    layout: 'blank',
+    public: true,
+  },
+})
 </script>
 
 <template>
@@ -17,7 +23,11 @@ const authThemeMask = useGenerateImageVariant(miscMaskLight, miscMaskDark)
       description="We couldn't find the page you are looking for."
     />
 
-   
+  <div class="text-center mb-11">
+  <VBtn to="/">
+    Back to Home
+  </VBtn>
+</div>
 
     <!-- 👉 Image -->
     <div class="misc-avatar w-100 text-center">
