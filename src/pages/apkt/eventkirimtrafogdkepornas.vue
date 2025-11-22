@@ -1,150 +1,138 @@
 <script setup lang="ts">
-import { createAgGridTheme, getGlobalAgGridTheme, setGlobalAgGridTheme } from '@core/index';
-import { useConfigStore } from '@core/stores/config';
-import { ModuleRegistry } from 'ag-grid-community';
-// ✅ Import module AG Grid terbaru (Enterprise + Community)
-import {
-  AdvancedFilterModule,
-  ClientSideRowModelModule,
-  ClipboardModule,
-  ColumnsToolPanelModule,
-  ExcelExportModule,
-  FiltersToolPanelModule,
-  GridChartsModule,
-  MenuModule, // 🟢 Tambahkan ini
-  NumberFilterModule,
-  RangeSelectionModule,
-  RowGroupingModule,
-  SetFilterModule,
-  StatusBarModule,
-  TextFilterModule, // 🟢 Tambahkan ini
-} from 'ag-grid-enterprise';
-
-import { AgGridVue } from 'ag-grid-vue3';
-import axios from 'axios';
-import { debounce } from 'lodash';
-import { computed, onMounted, ref, watch } from 'vue';
-
-// 🧩 Register semua modul yang dibutuhkan
-ModuleRegistry.registerModules([
-  ClientSideRowModelModule,
-  MenuModule,
-  ColumnsToolPanelModule,
-  FiltersToolPanelModule,
-  SetFilterModule,
-  TextFilterModule,     // 🟢 penting untuk floating text filter
-  NumberFilterModule,   // (opsional)
-  RowGroupingModule,
-  ClipboardModule,
-  ExcelExportModule,
-  RangeSelectionModule,
-  StatusBarModule,
-  GridChartsModule,
-  AdvancedFilterModule,
-])
+import { ROLE_ACCESS, ROLE_ACTION } from '@/components/helper/auth.helper';
+import { API_PATH } from '@/composables/_path.service';
+import CrmEarningReportsYearlyOverviewLineNew from '@/views/dashboards/crm/CrmEarningReportsYearlyOverviewLineNew.vue';
+import moment from 'moment';
+import { computed, onMounted, reactive, ref } from 'vue';
+import { useRouter } from 'vue-router';
+import TableIgrid from '../spectrum/component/TableIgrid.vue';
+const router = useRouter()
 
 
-const gridRef = ref()
-const loading = ref(false)
-const totalData = ref(0)
-const totalPages = ref(0)
-const rowData = ref<any[]>([])
+// Dummy fallback
+const statistics = ref({
+  jumlah_mapping: 35738,
+  persen_mapping: 23.06,
+  jumlah_not_mapping: 119239,
+  persen_not_mapping: 76.94,
 
-const filterValues:any = ref({
+  jumlah_aset: 154977,
+  jumlah_status: 34764,
+  jumlah_gap: 974,
+
+  persen_nyala: 94.64,
+  jumlah_nyala: 32902,
+
+  persen_padam: 5.36,
+  jumlah_padam: 1862,
+})
+
+// Chart dummy
+
+// OPTIONAL: replace later with real backend call
+const getData = async () => {
+  try {
+    // const res = await getAllByPath('your-service')
+    // if(res.data) statistics.value = res.data
+  } catch {
+    console.warn("Backend belum ready — pakai dummy")
+  }
+}
+const categories = ref<any[]>([])
+const series = ref<any[]>([])
+
+const loadDummyData = () => {
+  categories.value = [
+    "Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul"
+  ]
+
+  series.value = [
+    {
+      name: "Success",
+      data: [10, 25, 35, 40, 60, 75, 90]
+    },
+    {
+      name: "Failed",
+      data: [5, 10, 7, 12, 15, 8, 5]
+    },
+    {
+      name: "Pending",
+      data: [20, 15, 10, 18, 25, 22, 10]
+    }
+  ]
+}
+
+onMounted(() => {
+  getData()
+ loadDummyData()
+  
+})
+
+
+// Active tab
+const activeTab = ref('tree')
+
+// Filter values for different tabs
+const filterValues = ref<any>({
   page: 1,
   limit: 10,
-  path1: '',
-  path2: '',
-  path3: '',
-  path4: '',
-  path5: '',
-  durasi: '',
-  kesimpulan: '',
-  nama_pointtype: '',
-  id_induk_pointtype: '798be05c-4df2-4945-9a47-5745a0de66c6'
+  fungsi: 'TRAFO GD',
+  asset: [],
+  tree: true,
+  start_date: moment().format("YYYY-MM-DD 00:00:00"),
+  end_date: moment().format("YYYY-MM-DD 23:59:59"),
+  status: 'All',
+  pengiriman: 'All',
 })
-const gridTheme = getGlobalAgGridTheme()
-const configStore = useConfigStore()
-const gridThemeRef = ref(gridTheme) // bikin reactive theme
 
-// 🟢 API Service
-const pathService = API_PATH().fasop.realtime.analog
-const source = axios.CancelToken.source()
-// 🟢 Handler ketika filter (corong) berubah
-
-
-const onFilterChanged = debounce((params: any) => {
-  const api = params.api;
-  const filterModel = api.getFilterModel();
-
-  // 🧩 Ambil semua nilai filter aktif
-  const newFilters: Record<string, any> = {};
-
-  // Ambil nilai dari semua kolom aktif
-  for (const key in filterModel) {
-    const val = filterModel[key]?.filter;
-    if (val !== undefined && val !== "") {
-      newFilters[key] = val;
-    }
-  }
-
-  // 🧠 Bersihkan filter lama yang sudah tidak ada di filterModel
-  for (const key in filterValues.value) {
-    if (!(key in newFilters) && key !== "page" && key !== "limit") {
-      delete filterValues.value[key];
-    }
-  }
-
-  // 🔄 Gabungkan filter baru + panggil API
-  filterValues.value = {
-    ...filterValues.value,
-    ...newFilters,
-  };
-
-  getData(filterValues.value.page, filterValues.value.limit);
-}, 400);
-
-
-watch(
-  () => configStore.theme,
-  themeMode => {
-    // buat theme baru untuk AG Grid
-   const newAgTheme = createAgGridTheme(themeMode as 'light' | 'dark' | 'system')
-
-    setGlobalAgGridTheme(newAgTheme)
-    gridThemeRef.value = newAgTheme
-
-    // optional: CSS var supaya smooth transition
-    document.documentElement.style.setProperty('--ag-active-theme', themeMode)
-  },
-  { immediate: true },
-)
-// 🧱 Kolom AG Grid
+// Column definitions for event tables
 const columnDefs = ref([
-  { headerName: 'No', field: 'number', width: 80, filter: false },
-  { headerName: 'Point Number', field: 'point_number' },
-  { headerName: 'Tipe Point', field: 'nama_pointtype' },
-  { headerName: 'B1 (Lokasi)', field: 'path1' },
-  { headerName: 'B2 (Tegangan)', field: 'path2' },
-  { headerName: 'B3 (Bay)', field: 'path3' },
-  { headerName: 'B4 (Element)', field: 'path4' },
-  { headerName: 'B5 (Info)', field: 'path5' },
-  { headerName: 'Tanggal Value', field: 'datum_capture' },
-  { headerName: 'Value', field: 'value' },
-  { headerName: 'Tanggal Status', field: 'datum_2' },
-  { headerName: 'Status', field: 'status_2' },
-  { headerName: 'Durasi', field: 'durasi' },
   {
-    headerName: 'Kesimpulan',
-    field: 'kesimpulan',
+    headerName: "Nama Aset",
+    field: "nama",
+    pinned: "left",
+    width: 200,
+    filter: "agSetColumnFilter",
+  },
+  {
+    headerName: "Kode Aset",
+    field: "kode",
+    pinned: "left",
+    width: 150,
+    filter: "agSetColumnFilter",
+  },
+  {
+    headerName: "APD Code",
+    field: "apd_code",
+    width: 150,
+    filter: "agSetColumnFilter",
+  },
+  {
+    headerName: "Jenis Aset",
+    field: "fungsi",
+    width: 120,
+    filter: "agSetColumnFilter",
+  },
+  {
+    headerName: "Area ULP",
+    field: "ulp",
+    width: 120,
+    filter: "agSetColumnFilter",
+  },
+  {
+    headerName: "Area UP3",
+    field: "up3",
+    width: 120,
+    filter: "agSetColumnFilter",
+  },
+  {
+    headerName: "Kirim Portal",
+    field: "kafka",
+    width: 120,
+    filter: "agSetColumnFilter",
     cellRenderer: (params: any) => {
-      const status = params.value || 'INVALID'
-      const color =
-        status === 'VALID'
-          ? '#198754'
-          : status === 'INVALID'
-          ? '#dc3545'
-          : '#6c757d'
+      const value = params.value
+      const color = value === 'Ya' ? '#28a745' : value === 'Tidak' ? '#dc3545' : '#6c757d'
       return `
         <span style="
           background-color: ${color};
@@ -152,274 +140,820 @@ const columnDefs = ref([
           padding: 4px 8px;
           border-radius: 8px;
           font-size: 12px;
+          display: inline-block;
+          text-align: center;
+          width: 100%;
         ">
-          ${status}
+          ${value || 'Tidak'}
         </span>`
-    },
+    }
+  },
+  {
+    headerName: "Mode Pengiriman",
+    field: "mode_kafka",
+    width: 140,
+    filter: "agSetColumnFilter",
+    cellRenderer: (params: any) => {
+      const value = params.value
+      const color = value === 'OTOMATIS' ? '#28a745' : value === 'MANUAL' ? '#007bff' : '#6c757d'
+      return `
+        <span style="
+          background-color: ${color};
+          color: #fff;
+          padding: 4px 8px;
+          border-radius: 8px;
+          font-size: 12px;
+          display: inline-block;
+          text-align: center;
+          width: 100%;
+        ">
+          ${value || 'Not Set'}
+        </span>`
+    }
+  },
+  {
+    headerName: "Status Listrik",
+    field: "status",
+    width: 120,
+    filter: "agSetColumnFilter",
+    cellRenderer: (params: any) => {
+      const value = params.value
+      const color = value === 'NYALA' ? '#28a745' : value === 'PADAM' ? '#dc3545' : '#17a2b8'
+      return `
+        <span style="
+          background-color: ${color};
+          color: #fff;
+          padding: 4px 8px;
+          border-radius: 8px;
+          font-size: 12px;
+          display: inline-block;
+          text-align: center;
+          width: 100%;
+        ">
+          ${value || 'NOT DETECTED'}
+        </span>`
+    }
+  },
+  {
+    headerName: "Status Time",
+    field: "datum",
+    width: 150,
+  },
+  {
+    headerName: "Station",
+    field: "station",
+    width: 120,
+    filter: "agSetColumnFilter",
+  },
+  {
+    headerName: "Bay",
+    field: "point_name",
+    width: 120,
+    filter: "agSetColumnFilter",
   },
 ])
 
-// 🧠 Handler response data
-const handleRespDataApi = (data: any[], page: number, limit: number) =>
-  data.map((item: any, idx: number) => {
-    const status = item?.kesimpulan || 'INVALID'
-    const color =
-      status === 'VALID'
-        ? '#198754'
-        : status === 'INVALID'
-        ? '#dc3545'
-        : '#6c757d'
-
-    return {
-      number: (page - 1) * limit + idx + 1,
-      point_number: item?.point_number ?? '-',
-      nama_pointtype: item?.nama_pointtype ?? '-',
-      path1: item?.path1 ?? '-',
-      path2: item?.path2 ?? '-',
-      path3: item?.path3 ?? '-',
-      path4: item?.path4 ?? '-',
-      path5: item?.path5 ?? '-',
-      status_2: item?.status_2 ?? '-',
-      datum_2: item?.datum_2 ?? '-',
-      durasi: item?.durasi ?? '-',
-      value: item?.value ?? '-',
-      datum_capture: item?.datum_capture ?? '-',
-      kesimpulan: status,
-      color,
+// Event history column definitions
+const eventHistoryColumns = [
+  {
+    headerName: "Event ID",
+    field: "event_id",
+    width: 150,
+    filter: true,
+  },
+  {
+    headerName: "Status Event",
+    field: "status_2",
+    width: 120,
+    filter: true,
+    cellRenderer: (params: any) => {
+      const value = params.value
+      const color = value === 'NYALA' ? '#28a745' : value === 'PADAM' ? '#dc3545' : '#17a2b8'
+      return `
+        <span style="
+          background-color: ${color};
+          color: #fff;
+          padding: 4px 8px;
+          border-radius: 8px;
+          font-size: 12px;
+          display: inline-block;
+          text-align: center;
+          width: 100%;
+        ">
+          ${value}
+        </span>`
     }
-  })
+  },
+  {
+    headerName: "Waktu Event",
+    field: "datetime_created",
+    width: 150,
+    filter: true,
+  },
+  {
+    headerName: "Jumlah Aset",
+    field: "jlh",
+    width: 100,
+    filter: true,
+  },
+  {
+    headerName: "Status Pengiriman",
+    field: "status_pengiriman",
+    width: 140,
+    filter: true,
+    cellRenderer: (params: any) => {
+      const value = params.value
+      let color = '#6c757d'
+      let text = value
 
-// 🧠 Ambil data dari API
-const getData = async (page = 1, limit = 10) => {
-  loading.value = true
-  try {
-    const params = { ...filterValues.value, page, limit }
-    const req: any = await getAllByPath(pathService, params, source.token)
-    const results = req?.results || req?.data?.results || []
-    totalData.value = req?.total || req?.data?.total || results.length
-    totalPages.value = Math.ceil(totalData.value / limit)
-    rowData.value = handleRespDataApi(results, page, limit)
-  } catch (err) {
-    console.error(err)
-  } finally {
-    loading.value = false
-  }
-}
+      switch(value) {
+        case 0: color = '#ffc107'; text = 'Pending'; break
+        case 1: color = '#28a745'; text = 'Success'; break
+        case 2: color = '#dc3545'; text = 'Failed'; break
+        case 3: color = '#6c757d'; text = 'Blocked'; break
+        case 4: color = '#007bff'; text = 'On Hold'; break
+      }
 
-const handleFilterChange = (newFilterValues: any) => {
-  filterValues.value = { ...filterValues.value, ...newFilterValues }
-  getData(filterValues.value.page, filterValues.value.limit)
-}
+      return `
+        <span style="
+          background-color: ${color};
+          color: #fff;
+          padding: 4px 8px;
+          border-radius: 8px;
+          font-size: 12px;
+          display: inline-block;
+          text-align: center;
+          width: 100%;
+        ">
+          ${text}
+        </span>`
+    }
+  },
+  {
+    headerName: "Durasi Pengiriman",
+    field: "durasi_pengiriman",
+    width: 140,
+    filter: true,
+  },
+  {
+    headerName: "Area ULP",
+    field: "ulp",
+    width: 120,
+    filter: true,
+  },
+  {
+    headerName: "Area UP3",
+    field: "up3",
+    width: 120,
+    filter: true,
+  },
+  {
+    headerName: "Transaction ID",
+    field: "transaction_id",
+    width: 150,
+    filter: true,
+    cellRenderer: (params: any) => {
+      if (params.value) {
+        return `<button type="button" onclick="showPayload('${params.value}')" class="btn btn-sm btn-primary"> <i class="fas fa-eye"></i> ${params.value}</button>`
+      }
+      return ''
+    }
+  },
+]
 
-const changePage = (page: number) => {
-  if (page < 1 || page > totalPages.value) return
-  filterValues.value.page = page
-  getData(page, filterValues.value.limit)
-}
-
-const visiblePages = computed(() => {
-  const pages = []
-  const total = totalPages.value
-  const current = filterValues.value.page
-  const start = Math.max(1, current - 2)
-  const end = Math.min(total, start + 4)
-  for (let i = start; i <= end; i++) pages.push(i)
-  return pages
+// Default role actions
+const roleActions = reactive({
+  view: true,
+  create: true,
+  update: true,
+  delete: true,
 })
 
-watch(
-  () => filterValues.value.limit,
-  (newLimit) => {
-    filterValues.value.page = 1
-    getData(1, newLimit)
-  }
-)
+// Handle response data from API
+const handleRespDataApi = (data: any[], page: number, limit: number) =>
+  data.map((item: any, idx: number) => ({
+    number: (page - 1) * limit + idx + 1,
+    id: item?.id,
+    nama: item?.nama,
+    kode: item?.kode,
+    apd_code: item?.apd_code,
+    fungsi: item?.fungsi,
+    ulp: item?.ulp,
+    up3: item?.up3,
+    kafka: item?.kafka,
+    mode_kafka: item?.mode_kafka,
+    status: item?.status,
+    datum: item?.datum,
+    station: item?.station,
+    point_name: item?.point_name,
+  }))
 
-onMounted(() => getData(filterValues.value.page, filterValues.value.limit))
+const handleRespDataEventApi = (data: any[], page: number, limit: number) =>
+  data.map((item: any, idx: number) => ({
+    number: (page - 1) * limit + idx + 1,
+    event_id: item?.event_id,
+    status_2: item?.status_2,
+    datetime_created: item?.datetime_created,
+    jlh: item?.jlh,
+    status_pengiriman: item?.status_pengiriman,
+    durasi_pengiriman: item?.durasi_pengiriman,
+    ulp: item?.ulp,
+    up3: item?.up3,
+    transaction_id: item?.transaction_id,
+  }))
 
-// ⚙️ Default column setting
-const defaultColDef: any = {
-  sortable: true,
-  resizable: true,
-  filter: 'agTextColumnFilter', // ✅ harus string filter type, bukan boolean
-  floatingFilter: true,          // ✅ aktifkan floating filter
-  suppressMenu: false,
-  menuTabs: ['filterMenuTab', 'generalMenuTab'],
-  floatingFilterComponentParams: {
-    suppressFilterButton: true,
-  },
+// Handle edit action
+const handleEdit = (item: any) => {
+  router.push(`/apkt/eventkirimtrafogdkepornas/edit/${item.id}`)
 }
 
+// Get current API path based on active tab
+const currentApiPath = computed(() => {
+  if (activeTab.value === 'tree') {
+    return API_PATH().apkt.monitoring_gardu_status || 'app/event/data'
+  } else if (activeTab.value === 'scada') {
+    return 'app/event/histori'
+  } else if (activeTab.value === 'manual') {
+    return 'app/event/histori'
+  }
+  return API_PATH().fasop.history.digital
+})
 
-// ✅ Tampilkan semua menu utama
-const getMainMenuItems = (params: any) => params.defaultItems
+const currentColumns = computed(() => {
+  if (activeTab.value === 'tree') {
+    return columnDefs.value
+  } else {
+    return eventHistoryColumns
+  }
+})
+
+const currentHandleRespData = computed(() => {
+  if (activeTab.value === 'tree') {
+    return handleRespDataApi
+  } else {
+    return handleRespDataEventApi
+  }
+})
+
+// Load statistics on mount
+onMounted(() => {
+  loadStatistics()
+  
+  const roleAccess: any = ROLE_ACCESS('eventkirimtrafogdkepornas')
+  if (!roleAccess || !Array.isArray(roleAccess) || roleAccess.length === 0) {
+    return
+  }
+  const roleAct = {
+    view: ROLE_ACTION(roleAccess, 'view'),
+    create: ROLE_ACTION(roleAccess, 'create'),
+    update: ROLE_ACTION(roleAccess, 'update'),
+    delete: ROLE_ACTION(roleAccess, 'delete'),
+  }
+  Object.assign(roleActions, roleAct)
+})
+
+// Load statistics data
+const loadStatistics = async () => {
+  try {
+    // This would be replaced with actual API call
+    Object.assign(statistics, {
+      jumlah_mapping: 1250,
+      persen_mapping: 85,
+      jumlah_not_mapping: 220,
+      persen_not_mapping: 15,
+      jumlah_aset: 1470,
+      jumlah_status: 1180,
+      jumlah_gap: 90,
+      jumlah_nyala: 980,
+      jumlah_padam: 200,
+      persen_nyala: 83,
+      persen_padam: 17
+    })
+  } catch (error) {
+    console.error('Error loading statistics:', error)
+  }
+}
+
+// Load chart data
+
+// Handle tab change
+const handleTabChange = (tab: string) => {
+  activeTab.value = tab
+  // Reset filters when switching tabs
+  filterValues.value = {
+    ...filterValues.value,
+    page: 1,
+  }
+}
+
+// Handle filter change
+const handleFilterChange = (newFilterValues: any) => {
+  filterValues.value = { ...filterValues.value, ...newFilterValues }
+}
 </script>
-
 <template>
-<VRow class="match-height mb-4">
-    <VCol cols="12">
-      <AppCardCode title="Filter" :code="{ ts: '', js: '' }">
-        <FillterFasopRealTimeTelemetering :onFilterChange="handleFilterChange" />
-      </AppCardCode>
-    </VCol>
-  </VRow>
+ <div class="event-kirim-trafo-gd-kepornas">
 
-  <div>
-    <div class="loading-bar-container" v-show="loading">
-      <div class="loading-bar"></div>
-    </div>
+    <!-- GRID → STATISTICS + CHART -->
+  <div class="dashboard-grid">
 
-    <!-- 🟢 AG GRID -->
-    <AgGridVue
-      ref="gridRef"
-      style="height: 600px; width: 100%"
-   
-          :theme="gridThemeRef"
-      :columnDefs="columnDefs"
-      :rowData="rowData"
-      :defaultColDef="defaultColDef"
-      :getMainMenuItems="getMainMenuItems"
-      :gridOptions="{
-        rowSelection: 'single',
-        suppressHorizontalScroll: false,
-        suppressMenuHide: false,
-      }"
-      :sideBar="false"
-       @filterChanged="onFilterChanged" 
-    />
 
-    <!-- 🟢 Pagination -->
-    <div
-      class="d-flex justify-content-between align-items-center flex-wrap gap-3 pagination-container pt-2"
-      v-show="true"
-    >
-      <div class="d-flex align-items-center gap-1 flex-wrap">
-        <button
-          class="btn-pagination"
-          :disabled="filterValues.page === 1 || loading"
-          @click="changePage(filterValues.page - 1)"
-        >
-          ‹ Prev
-        </button>
+  <!-- LEFT SIDE -->
+<div class="left-column">
 
-        <button
-          v-for="p in visiblePages"
-          :key="p"
-          class="btn-pagination"
-          :class="{ active: p === filterValues.page }"
-          :disabled="loading"
-          @click="changePage(p)"
-        >
-          {{ p }}
-        </button>
+  <!-- CARD 1 → STAT MAPPING -->
+  <VCard class="panel-card pa-4 mb-4" elevation="2">
+    <div class="stat-wrapper">
 
-        <button
-          class="btn-pagination"
-          :disabled="filterValues.page >= totalPages || loading"
-          @click="changePage(filterValues.page + 1)"
-        >
-          Next ›
-        </button>
-      </div>
-
-      <div class="d-flex align-items-center gap-2">
-        <select
-          v-model.number="filterValues.limit"
-          class="form-select form-select-sm limit-select"
-          :disabled="loading"
-        >
-          <option v-for="s in [10, 20, 50, 100, 1000]" :key="s" :value="s">
-            {{ s }}
-          </option>
-        </select>
-      </div>
-
-      <div class="d-flex justify-content-between align-items-center flex-wrap mb-2 border-bottom pb-2">
-        <h6 class="fw-bold text-tosca mb-0">Total Data</h6>
-        <div class="data-summary text-end">
-          <span class="fw-semibold text-muted">{{ totalData.toLocaleString() }} Data</span>
+      <!-- Card 1 -->
+      <div class="stat-card stat-info">
+        <div class="stat-icon">
+          <i class="ti ti-route"></i>
+        </div>
+        <div class="stat-value">{{ statistics.jumlah_mapping }}</div>
+        <div class="stat-title">Aset sudah dimapping</div>
+        <div class="stat-sub">
+          <span>{{ statistics.persen_mapping }}%</span>
+          <small>dari total aset</small>
         </div>
       </div>
+
+      <!-- Card 2 -->
+      <div class="stat-card stat-warning">
+        <div class="stat-icon">
+          <i class="ti ti-route-off"></i>
+        </div>
+        <div class="stat-value">{{ statistics.jumlah_not_mapping }}</div>
+        <div class="stat-title">Aset belum dimapping</div>
+        <div class="stat-sub">
+          <span>{{ statistics.persen_not_mapping }}%</span>
+          <small>dari total aset</small>
+        </div>
+      </div>
+
     </div>
+  </VCard>
+
+
+
+<!-- CARD 2 → STATUS SUMMARY -->
+<VCard class="panel-card pa-4 stretch-card" elevation="2">
+
+    <div class="summary-header">
+      <span>Ikhtisar Status</span>
+
+      <div class="summary-count">
+        <span class="count-main">{{ statistics.jumlah_status }}</span>
+        <span v-if="statistics.jumlah_gap > 0" class="gap-badge">
+          ≈-{{ statistics.jumlah_gap }}
+        </span>
+      </div>
+    </div>
+
+    <h2 class="total-asset">
+      {{ statistics.jumlah_aset }}
+      <small>Total aset</small>
+    </h2>
+
+    <div class="status-row">
+      <div class="status-item">
+        <span class="status-icon success"><i class="ti ti-bulb"></i></span>
+        <strong>NYALA</strong>
+        <p>{{ statistics.persen_nyala }}%</p>
+        <small>{{ statistics.jumlah_nyala }}</small>
+      </div>
+
+      <div class="divider">VS</div>
+
+      <div class="status-item right">
+        <strong>PADAM</strong>
+        <span class="status-icon danger"><i class="ti ti-bulb-off"></i></span>
+        <p>{{ statistics.persen_padam }}%</p>
+        <small>{{ statistics.jumlah_padam }}</small>
+      </div>
+    </div>
+
+    <div class="progress-bar-wrapper">
+      <div class="bar success" :style="`width: ${statistics.persen_nyala}%`"></div>
+      <div class="bar danger" :style="`width: ${statistics.persen_padam}%`"></div>
+    </div>
+  </VCard>
+
+</div>
+
+
+  <!-- RIGHT -->
+  <VCard class="panel-card pa-4" elevation="2">
+
+    <div class="d-flex justify-space-between align-center mb-3">
+      <div>
+        <h4>Statistik Pengiriman Event</h4>
+        <small>Total pengiriman sukses: <b>{{ 123 }}</b></small>
+      </div>
+      <input type="text" class="date-input" placeholder="2025/11/21 - 2025/11/21"/>
+    </div>
+
+    <VCard class="chart-inner-card" elevation="0">
+      <VCardText class="pa-0">
+        <CrmEarningReportsYearlyOverviewLineNew 
+          :categories="categories"
+          :series="series"
+        />
+      </VCardText>
+    </VCard>
+  </VCard>
+</div>
+
+
+    <!-- TABS -->
+<div class="tabs-wrapper">
+  <VBtn
+    variant="outlined"
+    color="primary"
+    class="tab-btn"
+    :class="{ active: activeTab === 'tree' }"
+    @click="handleTabChange('tree')"
+  >
+    <i class="fa fa-sitemap mr-2"></i>
+    Tree Jaringan
+  </VBtn>
+
+  <VBtn
+    variant="outlined"
+    color="primary"
+    class="tab-btn"
+    :class="{ active: activeTab === 'scada' }"
+    @click="handleTabChange('scada')"
+  >
+    <i class="fa fa-cogs mr-2"></i>
+    Event SCADA
+
+    <VChip size="small" class="ml-2" color="primary" variant="flat">
+      8
+    </VChip>
+  </VBtn>
+
+  <VBtn
+    variant="outlined"
+    color="primary"
+    class="tab-btn"
+    :class="{ active: activeTab === 'manual' }"
+    @click="handleTabChange('manual')"
+  >
+    <i class="fa fa-desktop mr-2"></i>
+    Event Entri (Non-SCADA)
+  </VBtn>
+
+</div>
+
+
+    <!-- FILTER -->
+    <div class="filter-card">
+      <div class="filter-header">
+        <i class="ti ti-filter"></i> Filter Data
+      </div>
+
+      <div class="filter-grid">
+        <div>
+          <label>Root Aset</label>
+          <select v-model="filterValues.fungsi">
+            <option>TRAFO GD</option>
+            <option>GARDU DISTRIBUSI</option>
+            <option>PENYULANG</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Pilih Trafo GD</label>
+          <input type="text" placeholder="Cari / pilih aset..." />
+        </div>
+
+        <div class="toggle-section">
+          <label>Tree List</label>
+          <input type="checkbox" v-model="filterValues.tree"/>
+        </div>
+
+        <button class="btn-apply">Apply</button>
+      </div>
+    </div>
+
+
+    <!-- AG Grid Tables -->
+    <TableIgrid
+      v-if="activeTab === 'tree'"
+      :onclickEdit="handleEdit"
+      :column="currentColumns"
+      :filterValues="filterValues"
+      :pathService="currentApiPath"
+      :handleRespDataApi="currentHandleRespData"
+      primaryKey="id"
+    />
+
+    <!-- Event SCADA Table -->
+    <TableIgrid
+      v-if="activeTab === 'scada'"
+      :onclickEdit="handleEdit"
+      :column="currentColumns"
+      :filterValues="filterValues"
+      :pathService="currentApiPath"
+      :handleRespDataApi="currentHandleRespData"
+      primaryKey="event_id"
+    />
+
+    <!-- Event Manual Table -->
+    <TableIgrid
+      v-if="activeTab === 'manual'"
+      :onclickEdit="handleEdit"
+      :column="currentColumns"
+      :filterValues="filterValues"
+      :pathService="currentApiPath"
+      :handleRespDataApi="currentHandleRespData"
+      primaryKey="event_id"
+    />
   </div>
 </template>
-
 <style scoped>
-.text-tosca {
-  color: #009688;
+
+.event-kirim-trafo-gd-kepornas {
+  font-family: Inter, sans-serif;
 }
-.pagination-container {
-  border-top: 1px solid #dee2e6;
+
+/* ------------ GRID MAIN LAYOUT ------------ */
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 400px auto;
+  gap: 20px;
 }
-.btn-pagination {
-  background-color: #fff;
-  border: 1px solid #009688;
-  color: #009688;
-  font-size: 0.85rem;
-  padding: 5px 12px;
+/* ------------ STAT CARDS ------------ */
+/* Buat kolom kiri auto mengikuti tinggi konten kanan */
+.left-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  height: 100%;
+}
+
+/* Paksa card summary memanjang */
+.stretch-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Biar progress bar tetap di bawah card */
+.stretch-card .progress-bar-wrapper {
+  margin-top: auto;
+}
+
+
+.mb-4 {
+  margin-bottom: 20px;
+}
+
+.stat-wrapper {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.stat-card {
+  border: 1px solid #e6e6e6;
+  padding: 16px;
+  border-radius: 10px;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.stat-info { border-left: 4px solid #38bdf8; }
+.stat-warning { border-left: 4px solid #fbbf24; }
+
+.stat-icon {
+  width: 40px;
+  height: 40px;
   border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
 }
-.btn-pagination:hover:not(:disabled) {
-  background-color: #26a69a;
-  color: #fff;
-  transform: translateY(-1px);
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
 }
-.btn-pagination.active {
-  background-color: #009688;
-  color: white;
+
+.stat-title {
+  opacity: .7;
+  font-size: 14px;
+}
+
+.stat-sub {
+  font-size: 13px;
+  opacity: .8;
+}
+
+.stat-sub span {
   font-weight: 600;
 }
-.btn-pagination:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  background-color: #f8f8f8;
-  color: #aaa;
-}
-.limit-select {
-  border: 1px solid #009688;
-  color: #009688;
-  border-radius: 6px;
-  padding: 3px 6px;
-}
-.limit-select:focus {
-  border-color: #26a69a;
-  box-shadow: 0 0 0 0.2rem rgba(0, 150, 136, 0.25);
-}
-.data-summary {
-  font-size: 0.9rem;
-  color: #555;
+
+/* ------------ STATUS SUMMARY ------------ */
+
+.summary-card {
+  margin-top: 12px;
+  
+  padding: 20px;
+  border-radius: 12px;
 }
 
-/* 🔹 Loading bar style */
-.loading-bar-container {
-  height: 4px;
-  width: 100%;
-  background-color: #e0f2f1;
-  overflow: hidden;
-  position: relative;
-  border-radius: 2px;
-  margin-bottom: 6px;
-}
-.loading-bar {
-  position: absolute;
-  width: 40%;
-  height: 100%;
-  background-color: #009688;
-  animation: loading-bar-move 1.2s ease-in-out infinite;
-  border-radius: 2px;
+.summary-header {
+  display:flex;
+  justify-content:space-between;
+  font-size:14px;
+  opacity:.8;
 }
 
-@keyframes loading-bar-move {
-  0% {
-    left: -40%;
+.count-main {
+  color:#38bdf8;
+  font-weight:600;
+}
+
+.gap-badge {
+  /* background:#334155; */
+  padding:2px 6px;
+  color:#f87171;
+  border-radius:6px;
+  font-size:12px;
+}
+
+.total-asset {
+  margin-top:6px;
+  font-size:22px;
+  font-weight:700;
+}
+
+.total-asset small {
+  opacity:.6;
+  font-size:13px;
+}
+
+/* Status Comparison */
+.stat-wrapper {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+/* Optional responsive: auto stack on small screens */
+@media (max-width: 768px) {
+  .stat-wrapper {
+    grid-template-columns: 1fr;
   }
-  50% {
-    left: 60%;
-  }
-  100% {
-    left: 100%;
-  }
+}
+
+.status-row {
+  margin-top:15px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.status-item {
+  text-align:left;
+}
+
+.status-item.right{text-align:right;}
+
+.status-icon {
+  padding:6px;
+  border-radius:8px;
+  font-size:18px;
+}
+
+.success { background:#16a34a33;color:#22c55e; }
+.danger { background:#dc262633;color:#f87171; }
+
+.status-item p {
+  margin:5px 0;
+  font-size:18px;
+  font-weight:700;
+}
+
+.progress-bar-wrapper {
+  background:#334155;
+  border-radius:10px;
+  margin-top:15px;
+  height:10px;
+  display:flex;
+  overflow:hidden;
+}
+
+.bar {
+  height:10px;
+}
+
+.bar.success { background:#22c55e; }
+.bar.danger { background:#ef4444; }
+
+/* ------------ CHART SECTION ------------ */
+
+.chart-card {
+
+  border-radius:12px;
+  padding:20px;
+}
+
+.chart-header {
+  display:flex;
+  justify-content:space-between;
+}
+
+.date-input {
+
+  border:1px solid #334155;
+  padding:6px 10px;
+  border-radius:6px;
+
+}
+
+.chart-box {
+  height:260px;
+  margin-top:15px;
+}
+
+/* ------------ TABS ------------ */
+.tabs-wrapper {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  gap: 16px;
+}
+
+.tab-btn {
+  text-transform: none;
+  border-radius: 8px;
+  flex: 1;
+  justify-content: center;
+  font-weight: 500;
+}
+
+.tab-btn.active {
+
+
+  border-color: #46e54e !important;
+}
+
+
+.tab-badge {
+
+  padding:2px 6px;
+  border-radius:6px;
+}
+
+/* ------------ FILTER PANEL ------------ */
+
+.filter-card {
+ 
+  margin-top:20px;
+  padding:20px;
+  border-radius:12px;
+  border:1px solid #334155;
+}
+
+.filter-header {
+  font-weight:600;
+  margin-bottom:12px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.filter-grid {
+  display:grid;
+  grid-template-columns: repeat(4,1fr);
+  gap:20px;
+}
+
+select, input {
+
+  border:1px solid #334155;
+  padding:8px;
+  border-radius:8px;
+  width:100%;
+
+}
+
+.btn-apply {
+  background:#6366f1;
+  border:none;
+  padding:10px;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+.btn-apply:hover {
+  background:#4f46e5;
 }
 </style>

@@ -4,15 +4,15 @@ import { API_PATH } from '@/composables/_path.service'
 import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { PEMBANGKIT_COLUMNS } from '../component/columnref/realtime.config'
-import TableIgrid from '../component/TableIgrid.vue'
+import TableIgridwithPaging from '../component/TableIgridwithPaging.vue'
 
 const router = useRouter()
 
 const filterValues = ref<any>({
-  page: 1,
-  limit: 10,
+
   id_induk_pointtype: '3d391819-4288-4699-80f4-7ebd5ae0d733',
 })
+
 const columnDefs = ref(PEMBANGKIT_COLUMNS())
 // Default role (bisa diubah setelah load)
 const roleActions = reactive({
@@ -91,7 +91,7 @@ const handleFilterChange = (newFilterValues: any) => {
   
 
     <!-- Table -->
-    <TableIgrid
+    <TableIgridwithPaging
    
       :onclickEdit="handleEdit"
       :column="columnDefs"
